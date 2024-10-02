@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { ElementData } from '@tailor-cms/ce-true-false-manifest';
+import { ElementData } from '@tailor-cms/ce-drag-drop-manifest';
 
 const props = defineProps<{ id: number; data: ElementData; userState: any }>();
 const emit = defineEmits(['interaction']);

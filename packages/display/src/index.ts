@@ -1,5 +1,5 @@
-import baseManifest from '@tailor-cms/ce-true-false-manifest';
-import type { ElementManifest } from '@tailor-cms/ce-true-false-manifest';
+import baseManifest from '@tailor-cms/ce-drag-drop-manifest';
+import type { ElementManifest } from '@tailor-cms/ce-drag-drop-manifest';
 
 import Display from './components/Display.vue';
 

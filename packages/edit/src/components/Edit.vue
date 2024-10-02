@@ -11,7 +11,7 @@
 
 <script lang="ts" setup>
 import { defineEmits, defineProps } from 'vue';
-import { Element } from '@tailor-cms/ce-true-false-manifest';
+import { Element } from '@tailor-cms/ce-drag-drop-manifest';
 
 const emit = defineEmits(['save']);
 const props = defineProps<{ element: Element; isFocused: boolean }>();

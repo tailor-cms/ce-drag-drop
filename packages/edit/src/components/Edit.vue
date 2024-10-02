@@ -15,62 +15,67 @@
       auto-grow
     />
     <div class="text-subtitle-2 mb-2">Answer groups</div>
-    <VCard
-      v-for="(groupName, groupKey, index) in elementData.groups"
-      :key="groupKey"
-      class="pa-4 mb-4"
-    >
-      <div class="mb-4">
-        <VAvatar color="primary" variant="tonal">{{ index + 1 }}</VAvatar>
-        <VBtn
-          v-if="!isDisabled && groupCount > 2"
-          class="ml-1 px-2"
-          variant="text"
-          rounded
-          @click="removeGroup(groupKey)"
-        >
-          Remove answer group
-        </VBtn>
-      </div>
-      <VTextField
-        :model-value="groupName"
-        :readonly="isDisabled"
-        :rules="[requiredRule]"
-        class="my-2"
-        label="Group name"
-        @update:model-value="updateGroupName(groupKey, $event)"
-      />
-      <VTextField
-        v-for="(answer, answerKey) in getAnswers(groupKey)"
-        :key="answerKey"
-        :model-value="answer"
-        :readonly="isDisabled"
-        :rules="[requiredRule]"
-        class="my-2"
-        placeholder="Answer..."
-        @update:model-value="updateAnswer(answerKey, $event)"
+    <VSlideYTransition group>
+      <div
+        v-for="(groupName, groupKey, index) in elementData.groups"
+        :key="groupKey"
       >
-        <template v-if="!isDisabled && answerCount(groupKey) > 1" #append>
+        <div class="mb-4">
+          <VChip class="readonly" label>
+            {{ index + 1 }}
+          </VChip>
           <VBtn
-            aria-label="Remove answer"
-            density="comfortable"
-            icon="mdi-close"
+            v-if="!isDisabled && groupCount > 2"
+            class="ml-1 px-2"
             variant="text"
-            @click="removeAnswer(groupKey, answerKey)"
-          />
-        </template>
-      </VTextField>
-      <div v-if="!isDisabled" class="mb-4 d-flex justify-end">
-        <VBtn
-          prepend-icon="mdi-plus"
-          variant="text"
-          rounded
-          @click="addAnswer(groupKey)"
-        >
-          Add Answer
-        </VBtn>
+            rounded
+            @click="removeGroup(groupKey)"
+          >
+            Remove answer group
+          </VBtn>
+        </div>
+        <VTextField
+          :model-value="groupName"
+          :readonly="isDisabled"
+          :rules="[requiredRule]"
+          class="my-2"
+          label="Group name"
+          @update:model-value="updateGroupName(groupKey, $event)"
+        />
+        <VSlideYTransition group>
+          <VTextField
+            v-for="(answer, answerKey) in getAnswers(groupKey)"
+            :key="answerKey"
+            :model-value="answer"
+            :readonly="isDisabled"
+            :rules="[requiredRule]"
+            class="my-2"
+            placeholder="Answer..."
+            @update:model-value="updateAnswer(answerKey, $event)"
+          >
+            <template v-if="!isDisabled && answerCount(groupKey) > 1" #append>
+              <VBtn
+                aria-label="Remove answer"
+                density="comfortable"
+                icon="mdi-close"
+                variant="text"
+                @click="removeAnswer(groupKey, answerKey)"
+              />
+            </template>
+          </VTextField>
+        </VSlideYTransition>
+        <div v-if="!isDisabled" class="mb-4 d-flex justify-end">
+          <VBtn
+            prepend-icon="mdi-plus"
+            variant="text"
+            rounded
+            @click="addAnswer(groupKey)"
+          >
+            Add Answer
+          </VBtn>
+        </div>
       </div>
-    </VCard>
+    </VSlideYTransition>
     <div v-if="!isDisabled" class="d-flex justify-center mb-4">
       <VBtn prepend-icon="mdi-plus" variant="text" rounded @click="addGroup">
         Add Answer Group

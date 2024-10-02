@@ -112,6 +112,13 @@ const elementData = reactive<ElementData>(cloneDeep(props.element.data));
 const isDirty = computed(() => isEqual(elementData, props.element.data));
 const groupCount = computed(() => size(elementData.groups));
 
+const getAnswers = (groupKey: string) => {
+  const keys = elementData.correct[groupKey];
+  return pick(elementData.answers, keys);
+};
+
+const answerCount = (groupKey: string) => size(elementData.correct[groupKey]);
+
 const addAnswer = (groupKey: string) => {
   const answerKey = uuid();
   elementData.answers[answerKey] = '';
@@ -122,13 +129,6 @@ const removeAnswer = (groupKey: string, answerKey: string) => {
   delete elementData.answers[groupKey];
   pull(elementData.correct[groupKey], answerKey);
 };
-
-const getAnswers = (groupKey: string) => {
-  const keys = elementData.correct[groupKey];
-  return pick(elementData.answers, keys);
-};
-
-const answerCount = (groupKey: string) => size(elementData.correct[groupKey]);
 
 const updateAnswer = (key: string, value: string) =>
   (elementData.answers[key] = value);

@@ -6,7 +6,7 @@ import type {
   ElementManifest,
 } from './interfaces';
 
-const [uuid1, uuid2, uuid3, uuid4] = Array.from({ length: 3 }, () => uuid());
+const [uuid1, uuid2, uuid3, uuid4] = Array.from({ length: 4 }, () => uuid());
 
 // Element unique id within the target system (e.g. Tailor)
 export const type = 'CE_DRAG_DROP';

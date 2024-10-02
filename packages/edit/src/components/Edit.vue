@@ -26,7 +26,7 @@
           </VChip>
           <VBtn
             v-if="!isDisabled && groupCount > 2"
-            class="ml-1 px-2"
+            class="ml-2"
             variant="text"
             rounded
             @click="removeGroup(groupKey)"

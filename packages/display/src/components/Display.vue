@@ -146,7 +146,7 @@ const chipProps = (groupId: string, answerId: string) => {
 };
 
 const answersRule = (val: string[]) => {
-  return !val.length || 'All the answers must be used.';
+  return submitted.value || !val.length || 'All the answers must be used.';
 };
 
 watch(

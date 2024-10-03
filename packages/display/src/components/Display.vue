@@ -68,25 +68,34 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import cloneDeep from 'lodash/cloneDeep';
+import difference from 'lodash/difference';
 import Draggable from 'vuedraggable/src/vuedraggable';
 import { ElementData } from '@tailor-cms/ce-drag-drop-manifest';
+import flatMap from 'lodash/flatMap';
 import map from 'lodash/map';
 import mapValues from 'lodash/mapValues';
 import pull from 'lodash/pull';
 import shuffle from 'lodash/shuffle';
 import uniqueId from 'lodash/uniqueId';
 
-const initializeAnswer = () =>
+const initializeUserAnswer = () =>
   cloneDeep(props.userState?.response) ??
   mapValues(props.data.groups, () => []);
+
+const initializeAnswers = () => {
+  const answerIds = Object.keys(props.data.answers);
+  const usedAnswerIds = flatMap(props.userState.response) as string[];
+  const remainingAnswers = difference(answerIds, usedAnswerIds);
+  return shuffle(remainingAnswers);
+};
 
 const props = defineProps<{ id: number; data: ElementData; userState: any }>();
 const emit = defineEmits(['interaction']);
 
 const form = ref<HTMLFormElement>();
 const submitted = ref('isCorrect' in (props.userState ?? {}));
-const answers = ref(shuffle(Object.keys(props.data.answers)));
-const userAnswer = ref(initializeAnswer());
+const answers = ref(initializeAnswers());
+const userAnswer = ref(initializeUserAnswer());
 
 const config = computed(() => ({
   groupsPerRow: 2,
@@ -121,7 +130,8 @@ const chipProps = (groupId: string, answerId: string) => {
 watch(
   () => props.userState,
   (state = {}) => {
-    userAnswer.value = initializeAnswer();
+    answers.value = initializeAnswers();
+    userAnswer.value = initializeUserAnswer();
     submitted.value = 'isCorrect' in state;
   },
   { deep: true },
@@ -129,8 +139,7 @@ watch(
 
 watch(
   () => props.data.answers,
-  () => (answers.value = shuffle(Object.keys(props.data.answers))),
-  { deep: true },
+  () => (answers.value = initializeAnswers()),
 );
 </script>
 

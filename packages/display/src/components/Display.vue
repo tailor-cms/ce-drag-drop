@@ -7,6 +7,7 @@
           :model-value="answers"
           :rules="[answersRule]"
           hide-details="auto"
+          validate-on="submit"
         >
           <VCard
             class="w-100 bg-blue-grey-lighten-4"
@@ -146,7 +147,7 @@ const chipProps = (groupId: string, answerId: string) => {
 };
 
 const answersRule = (val: string[]) => {
-  return submitted.value || !val.length || 'All the answers must be used.';
+  return !val.length || 'All the answers must be used.';
 };
 
 watch(

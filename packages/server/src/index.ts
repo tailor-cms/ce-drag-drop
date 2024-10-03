@@ -62,8 +62,6 @@ export function onUserInteraction(
   });
   // Simulate user state update within CEK
   if (IS_CEK) {
-    // Only for showcase purposes
-    USER_STATE.interactionTimestamp = new Date().getTime();
     // Can be reset to initial / mocked state via UI
     Object.assign(context, { response: payload.response, isCorrect });
   }

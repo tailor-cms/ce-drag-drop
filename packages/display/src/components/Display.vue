@@ -3,30 +3,47 @@
     <div class="px-2 my-4">{{ data.question }}</div>
     <VRow class="mb-2">
       <VCol cols="12">
-        <VCard variant="flat">
-          <VCardTitle>Answers</VCardTitle>
-          <VDivider />
-          <VCardText>
-            <Draggable
-              :disabled="submitted"
-              :list="answers"
-              v-bind="draggableOptions"
-              class="box"
-              item-key="id"
-            >
-              <template #item="{ element: answerId }">
-                <VChip :text="data.answers[answerId]" />
-              </template>
-            </Draggable>
-          </VCardText>
-        </VCard>
+        <VInput
+          :model-value="answers"
+          :rules="[answersRule]"
+          hide-details="auto"
+        >
+          <VCard
+            class="w-100 bg-blue-grey-lighten-4"
+            color="blue-grey-darken-2"
+            variant="outlined"
+          >
+            <VCardTitle>Answers</VCardTitle>
+            <VDivider />
+            <VCardText>
+              <Draggable
+                :disabled="submitted"
+                :list="answers"
+                v-bind="draggableOptions"
+                class="box"
+                item-key="id"
+              >
+                <template #item="{ element: answerId }">
+                  <VChip
+                    :class="{ draggable: !submitted }"
+                    :text="data.answers[answerId]"
+                  />
+                </template>
+              </Draggable>
+            </VCardText>
+          </VCard>
+        </VInput>
       </VCol>
       <VCol
         v-for="{ id: groupId, group } in groupsCollection"
         :key="groupId"
         :cols="12 / config.groupsPerRow"
       >
-        <VCard variant="flat">
+        <VCard
+          class="bg-blue-grey-lighten-4"
+          color="blue-grey-darken-2"
+          variant="outlined"
+        >
           <VCardTitle>{{ group }}</VCardTitle>
           <VDivider />
           <VCardText class="">
@@ -40,6 +57,7 @@
               <template #item="{ element: answerId }">
                 <VChip
                   v-bind="chipProps(groupId, answerId)"
+                  :class="{ draggable: !submitted }"
                   :closable="!submitted"
                   :text="data.answers[answerId]"
                   @click:close="removeAnswer(groupId, answerId)"
@@ -127,10 +145,13 @@ const chipProps = (groupId: string, answerId: string) => {
   return { prependIcon: 'mdi-close-circle', color: 'error' };
 };
 
+const answersRule = (val: string[]) => {
+  return !val.length || 'All the answers must be used.';
+};
+
 watch(
   () => props.userState,
   (state = {}) => {
-    answers.value = initializeAnswers();
     userAnswer.value = initializeUserAnswer();
     submitted.value = 'isCorrect' in state;
   },
@@ -155,10 +176,8 @@ watch(
   flex-wrap: wrap;
   gap: 0.5rem;
 
-  [draggable='true'] {
-    .v-chip {
-      cursor: move;
-    }
+  .v-chip.draggable {
+    cursor: move;
   }
 }
 </style>

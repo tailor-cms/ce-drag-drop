@@ -12,13 +12,7 @@
           <VCard class="w-100" color="blue-grey-lighten-4" variant="flat">
             <VCardTitle>Answers</VCardTitle>
             <VDivider />
-            <Draggable
-              :disabled="submitted"
-              :list="answers"
-              v-bind="draggableOptions"
-              class="box"
-              item-key="id"
-            >
+            <Draggable :list="answers" v-bind="draggableOptions">
               <template #item="{ element: answerId }">
                 <VCard
                   :class="{ draggable: !submitted }"
@@ -42,13 +36,7 @@
         <VCard class="h-100" color="blue-grey-lighten-4" variant="flat">
           <VCardTitle>{{ group }}</VCardTitle>
           <VDivider />
-          <Draggable
-            :disabled="submitted"
-            :list="userAnswer[groupId]"
-            v-bind="draggableOptions"
-            class="box"
-            item-key="id"
-          >
+          <Draggable :list="userAnswer[groupId]" v-bind="draggableOptions">
             <template #item="{ element: answerId }">
               <VCard
                 :class="{ draggable: !submitted }"
@@ -130,8 +118,11 @@ const config = computed(() => ({
 }));
 
 const draggableOptions = computed(() => ({
-  animation: 150,
+  class: 'box',
+  itemKey: 'id',
+  disabled: submitted.value,
   group: `dragDrop-${uniqueId()}`,
+  animation: 150,
 }));
 
 const groupsCollection = computed(() => {

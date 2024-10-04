@@ -9,11 +9,7 @@
           hide-details="auto"
           validate-on="submit"
         >
-          <VCard
-            class="w-100 bg-blue-grey-lighten-4"
-            color="blue-grey-darken-2"
-            variant="outlined"
-          >
+          <VCard class="w-100" color="blue-grey-lighten-4" variant="flat">
             <VCardTitle>Answers</VCardTitle>
             <VDivider />
             <VCardText>
@@ -25,10 +21,15 @@
                 item-key="id"
               >
                 <template #item="{ element: answerId }">
-                  <VChip
+                  <VCard
                     :class="{ draggable: !submitted }"
-                    :text="data.answers[answerId]"
-                  />
+                    class="w-100"
+                    variant="flat"
+                  >
+                    <VCardText class="text-subtitle-1">
+                      {{ data.answers[answerId] }}
+                    </VCardText>
+                  </VCard>
                 </template>
               </Draggable>
             </VCardText>
@@ -40,14 +41,10 @@
         :key="groupId"
         :cols="12 / config.groupsPerRow"
       >
-        <VCard
-          class="bg-blue-grey-lighten-4"
-          color="blue-grey-darken-2"
-          variant="outlined"
-        >
+        <VCard class="h-100" color="blue-grey-lighten-4" variant="flat">
           <VCardTitle>{{ group }}</VCardTitle>
           <VDivider />
-          <VCardText class="">
+          <VCardText>
             <Draggable
               :disabled="submitted"
               :list="userAnswer[groupId]"
@@ -56,13 +53,29 @@
               item-key="id"
             >
               <template #item="{ element: answerId }">
-                <VChip
-                  v-bind="chipProps(groupId, answerId)"
+                <VCard
                   :class="{ draggable: !submitted }"
-                  :closable="!submitted"
-                  :text="data.answers[answerId]"
-                  @click:close="removeAnswer(groupId, answerId)"
-                />
+                  class="w-100 d-flex"
+                  variant="flat"
+                >
+                  <VCardText class="text-subtitle-1">
+                    {{ data.answers[answerId] }}
+                  </VCardText>
+                  <VBtn
+                    v-if="!submitted"
+                    class="ma-2"
+                    density="comfortable"
+                    icon="mdi-close"
+                    variant="text"
+                    @click="removeAnswer(groupId, answerId)"
+                  />
+                  <VIcon
+                    v-else
+                    v-bind="iconProps(groupId, answerId)"
+                    class="ma-3"
+                    size="large"
+                  />
+                </VCard>
               </template>
             </Draggable>
           </VCardText>
@@ -98,8 +111,10 @@ import shuffle from 'lodash/shuffle';
 import uniqueId from 'lodash/uniqueId';
 
 const initializeUserAnswer = () =>
-  cloneDeep(props.userState?.response) ??
-  mapValues(props.data.groups, () => []);
+  mapValues(
+    props.data.groups,
+    (_, key) => cloneDeep(props.userState?.response?.[key]) ?? [],
+  );
 
 const initializeAnswers = () => {
   const answerIds = Object.keys(props.data.answers);
@@ -139,11 +154,10 @@ const submit = async () => {
   if (valid) emit('interaction', { response: userAnswer.value });
 };
 
-const chipProps = (groupId: string, answerId: string) => {
-  if (!submitted.value || !props.userState.correct) return;
-  const isCorrect = props.userState?.correct[groupId].includes(answerId);
-  if (isCorrect) return { prependIcon: 'mdi-check-circle', color: 'success' };
-  return { prependIcon: 'mdi-close-circle', color: 'error' };
+const iconProps = (groupId: string, answerId: string) => {
+  const isCorrect = props.userState?.correct?.[groupId].includes(answerId);
+  if (isCorrect) return { icon: 'mdi-check-circle', color: 'success' };
+  return { icon: 'mdi-close-circle', color: 'error' };
 };
 
 const answersRule = (val: string[]) => {
@@ -153,8 +167,8 @@ const answersRule = (val: string[]) => {
 watch(
   () => props.userState,
   (state = {}) => {
-    userAnswer.value = initializeUserAnswer();
     submitted.value = 'isCorrect' in state;
+    userAnswer.value = initializeUserAnswer();
   },
   { deep: true },
 );
@@ -162,6 +176,11 @@ watch(
 watch(
   () => props.data.answers,
   () => (answers.value = initializeAnswers()),
+);
+
+watch(
+  () => props.data.groups,
+  () => (userAnswer.value = initializeUserAnswer()),
 );
 </script>
 
@@ -177,7 +196,7 @@ watch(
   flex-wrap: wrap;
   gap: 0.5rem;
 
-  .v-chip.draggable {
+  .v-card.draggable {
     cursor: move;
   }
 }

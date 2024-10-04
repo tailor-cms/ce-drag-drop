@@ -12,27 +12,25 @@
           <VCard class="w-100" color="blue-grey-lighten-4" variant="flat">
             <VCardTitle>Answers</VCardTitle>
             <VDivider />
-            <VCardText>
-              <Draggable
-                :disabled="submitted"
-                :list="answers"
-                v-bind="draggableOptions"
-                class="box"
-                item-key="id"
-              >
-                <template #item="{ element: answerId }">
-                  <VCard
-                    :class="{ draggable: !submitted }"
-                    class="w-100"
-                    variant="flat"
-                  >
-                    <VCardText class="text-subtitle-1">
-                      {{ data.answers[answerId] }}
-                    </VCardText>
-                  </VCard>
-                </template>
-              </Draggable>
-            </VCardText>
+            <Draggable
+              :disabled="submitted"
+              :list="answers"
+              v-bind="draggableOptions"
+              class="box"
+              item-key="id"
+            >
+              <template #item="{ element: answerId }">
+                <VCard
+                  :class="{ draggable: !submitted }"
+                  class="w-100"
+                  variant="flat"
+                >
+                  <VCardText class="text-subtitle-1">
+                    {{ data.answers[answerId] }}
+                  </VCardText>
+                </VCard>
+              </template>
+            </Draggable>
           </VCard>
         </VInput>
       </VCol>
@@ -44,41 +42,39 @@
         <VCard class="h-100" color="blue-grey-lighten-4" variant="flat">
           <VCardTitle>{{ group }}</VCardTitle>
           <VDivider />
-          <VCardText>
-            <Draggable
-              :disabled="submitted"
-              :list="userAnswer[groupId]"
-              v-bind="draggableOptions"
-              class="box"
-              item-key="id"
-            >
-              <template #item="{ element: answerId }">
-                <VCard
-                  :class="{ draggable: !submitted }"
-                  class="w-100 d-flex"
-                  variant="flat"
-                >
-                  <VCardText class="text-subtitle-1">
-                    {{ data.answers[answerId] }}
-                  </VCardText>
-                  <VBtn
-                    v-if="!submitted"
-                    class="ma-2"
-                    density="comfortable"
-                    icon="mdi-close"
-                    variant="text"
-                    @click="removeAnswer(groupId, answerId)"
-                  />
-                  <VIcon
-                    v-else
-                    v-bind="iconProps(groupId, answerId)"
-                    class="ma-3"
-                    size="large"
-                  />
-                </VCard>
-              </template>
-            </Draggable>
-          </VCardText>
+          <Draggable
+            :disabled="submitted"
+            :list="userAnswer[groupId]"
+            v-bind="draggableOptions"
+            class="box"
+            item-key="id"
+          >
+            <template #item="{ element: answerId }">
+              <VCard
+                :class="{ draggable: !submitted }"
+                class="w-100 d-flex"
+                variant="flat"
+              >
+                <VCardText class="text-subtitle-1">
+                  {{ data.answers[answerId] }}
+                </VCardText>
+                <VBtn
+                  v-if="!submitted"
+                  class="ma-2"
+                  density="comfortable"
+                  icon="mdi-close"
+                  variant="text"
+                  @click="removeAnswer(groupId, answerId)"
+                />
+                <VIcon
+                  v-else
+                  v-bind="iconProps(groupId, answerId)"
+                  class="ma-3"
+                  size="large"
+                />
+              </VCard>
+            </template>
+          </Draggable>
         </VCard>
       </VCol>
     </VRow>
@@ -191,9 +187,12 @@ watch(
 }
 
 .box {
+  padding: 1rem;
+  height: 100%;
   min-height: 2.5rem;
   display: flex;
   flex-wrap: wrap;
+  align-content: flex-start;
   gap: 0.5rem;
 
   .v-card.draggable {

@@ -107,10 +107,8 @@ import shuffle from 'lodash/shuffle';
 import uniqueId from 'lodash/uniqueId';
 
 const initializeUserAnswer = () =>
-  mapValues(
-    props.data.groups,
-    (_, key) => cloneDeep(props.userState?.response?.[key]) ?? [],
-  );
+  cloneDeep(props.userState?.response) ??
+  mapValues(props.data.groups, () => []);
 
 const initializeAnswers = () => {
   const answerIds = Object.keys(props.data.answers);
@@ -171,12 +169,13 @@ watch(
 
 watch(
   () => props.data.answers,
-  () => (answers.value = initializeAnswers()),
-);
-
-watch(
-  () => props.data.groups,
-  () => (userAnswer.value = initializeUserAnswer()),
+  () => {
+    answers.value = initializeAnswers();
+    Object.keys(props.data.groups).forEach((groupId) => {
+      if (!userAnswer.value[groupId]) userAnswer.value[groupId] = [];
+    });
+  },
+  { deep: true },
 );
 </script>
 

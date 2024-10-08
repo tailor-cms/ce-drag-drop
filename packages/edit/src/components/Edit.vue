@@ -20,13 +20,23 @@
         v-for="(groupName, groupKey, index) in elementData.groups"
         :key="groupKey"
       >
-        <div class="mb-4">
-          <VChip class="readonly" label>
+        <div class="d-flex mb-4">
+          <VChip
+            class="font-weight-bold"
+            color="primary-darken-3"
+            size="small"
+            variant="flat"
+            label
+          >
             {{ index + 1 }}
           </VChip>
+          <VSpacer />
           <VBtn
             v-if="!isDisabled && groupCount > 2"
             class="ml-2"
+            color="secondary-darken-1"
+            prepend-icon="mdi-delete"
+            size="small"
             variant="text"
             rounded
             @click="removeGroup(groupKey)"

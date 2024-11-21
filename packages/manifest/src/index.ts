@@ -30,6 +30,7 @@ export const initState: DataInitializer = (): ElementData => ({
     [uuid1]: [uuid3],
     [uuid2]: [uuid4],
   },
+  hint: '',
 });
 
 // Can be loaded from package.json
@@ -44,18 +45,14 @@ const ui = {
   forceFullWidth: true,
 };
 
-export const mocks = {
-  displayContexts: [{ name: 'No selection', data: {} }],
-};
-
 const manifest: ElementManifest = {
   type,
   version: '1.0',
   name,
   ssr: false,
+  isQuestion: true,
   initState,
   ui,
-  mocks,
 };
 
 export default manifest;

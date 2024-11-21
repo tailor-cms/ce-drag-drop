@@ -1,10 +1,10 @@
 {
   "name": "@tailor-cms/ce-drag-drop",
-  "description": "Tailor CMS drag & drop element",
-  "private": true,
-  "version": "0.0.1",
   "author": "Studion <info@gostudion.com> (https://github.com/tailor-cms)",
+  "description": "Tailor CMS drag & drop element",
   "type": "module",
+  "version": "0.0.1",
+  "private": true,
   "exports": {
     "./edit": {
       "import": "./packages/edit/dist/index.js",

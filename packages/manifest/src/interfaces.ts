@@ -3,6 +3,7 @@ export interface ElementData {
   groups: Record<string, string>;
   answers: Record<string, string>;
   correct: Record<string, string[]>;
+  hint: string;
 }
 
 export interface Element {
@@ -31,6 +32,7 @@ export interface ElementManifest {
   version: string;
   name: string;
   ssr: boolean;
+  isQuestion?: boolean;
   initState: DataInitializer;
   Edit?: object;
   TopToolbar?: object;

@@ -1,18 +1,17 @@
 <template>
   <VForm
     ref="form"
-    class="tce-container"
+    class="tce-drag-drop my-4"
     validate-on="submit"
     @submit.prevent="save"
   >
-    <VTextarea
+    <RichTextEditor
       v-model="elementData.question"
       :readonly="isDisabled"
       :rules="[requiredRule]"
       class="my-3"
       label="Question"
-      rows="3"
-      auto-grow
+      variant="outlined"
     />
     <div class="text-subtitle-2 mb-2">Answer groups</div>
     <VSlideYTransition group>
@@ -38,7 +37,6 @@
             prepend-icon="mdi-delete"
             size="small"
             variant="text"
-            rounded
             @click="removeGroup(groupKey)"
           >
             Remove answer group
@@ -48,8 +46,9 @@
           :model-value="groupName"
           :readonly="isDisabled"
           :rules="[requiredRule]"
-          class="my-2"
+          class="mt-2"
           label="Group name"
+          variant="outlined"
           @update:model-value="updateGroupName(groupKey, $event)"
         />
         <VSlideYTransition group>
@@ -59,13 +58,15 @@
             :model-value="answer"
             :readonly="isDisabled"
             :rules="[requiredRule]"
-            class="my-2"
+            class="mt-2"
             placeholder="Answer..."
+            variant="outlined"
             @update:model-value="updateAnswer(answerKey, $event)"
           >
             <template v-if="!isDisabled && answerCount(groupKey) > 1" #append>
               <VBtn
                 aria-label="Remove answer"
+                color="primary-darken-4"
                 density="comfortable"
                 icon="mdi-close"
                 variant="text"
@@ -76,9 +77,9 @@
         </VSlideYTransition>
         <div v-if="!isDisabled" class="mb-4 d-flex justify-end">
           <VBtn
+            color="primary-darken-4"
             prepend-icon="mdi-plus"
             variant="text"
-            rounded
             @click="addAnswer(groupKey)"
           >
             Add Answer
@@ -86,14 +87,34 @@
         </div>
       </div>
     </VSlideYTransition>
-    <div v-if="!isDisabled" class="d-flex justify-center mb-4">
-      <VBtn prepend-icon="mdi-plus" variant="text" rounded @click="addGroup">
+    <div v-if="!isDisabled" class="d-flex justify-center mb-12">
+      <VBtn color="primary-darken-4" prepend-icon="mdi-plus" variant="text" rounded @click="addGroup">
         Add Answer Group
       </VBtn>
     </div>
+    <VTextField
+      v-model="elementData.hint"
+      :clearable="!isDisabled"
+      :readonly="isDisabled"
+      placeholder="Optional hint..."
+      variant="outlined"
+    />
     <div v-if="!isDisabled" class="d-flex justify-end">
-      <VBtn :disabled="isDirty" variant="text" @click="cancel">Cancel</VBtn>
-      <VBtn :disabled="isDirty" class="ml-2" type="submit" variant="tonal">
+      <VBtn
+        :disabled="isDirty"
+        color="primary-darken-4"
+        variant="text"
+        @click="cancel"
+      >
+        Cancel
+      </VBtn>
+      <VBtn
+        :disabled="isDirty"
+        class="ml-2"
+        color="primary-darken-3"
+        type="submit"
+        variant="tonal"
+      >
         Save
       </VBtn>
     </div>
@@ -107,6 +128,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
 import pick from 'lodash/pick';
 import pull from 'lodash/pull';
+import { RichTextEditor } from '@tailor-cms/core-components';
 import size from 'lodash/size';
 import { v4 as uuid } from 'uuid';
 
@@ -183,7 +205,7 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-.tce-container {
+.tce-drag-drop {
   text-align: left;
 }
 </style>

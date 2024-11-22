@@ -15,9 +15,12 @@
     />
     <div class="text-subtitle-2 mb-2">Answer groups</div>
     <VSlideYTransition group>
-      <div
+      <VSheet
         v-for="(groupName, groupKey, index) in elementData.groups"
         :key="groupKey"
+        class="pa-4 mb-4"
+        rounded="lg"
+        border
       >
         <div class="d-flex mb-4">
           <VChip
@@ -39,7 +42,7 @@
             variant="text"
             @click="removeGroup(groupKey)"
           >
-            Remove answer group
+            Delete answer group
           </VBtn>
         </div>
         <VTextField
@@ -85,10 +88,16 @@
             Add Answer
           </VBtn>
         </div>
-      </div>
+      </VSheet>
     </VSlideYTransition>
     <div v-if="!isDisabled" class="d-flex justify-center mb-12">
-      <VBtn color="primary-darken-4" prepend-icon="mdi-plus" variant="text" rounded @click="addGroup">
+      <VBtn
+        color="primary-darken-4"
+        prepend-icon="mdi-plus"
+        variant="text"
+        rounded
+        @click="addGroup"
+      >
         Add Answer Group
       </VBtn>
     </div>
@@ -122,7 +131,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineEmits, defineProps, reactive, ref, watch } from 'vue';
+import { computed, inject, reactive, ref, watch } from 'vue';
 import { Element, ElementData } from '@tailor-cms/ce-drag-drop-manifest';
 import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
@@ -138,6 +147,8 @@ const props = defineProps<{
   isFocused: boolean;
   isDisabled: boolean;
 }>();
+
+const eventBus = inject('$eventBus') as any;
 
 const form = ref<HTMLFormElement>();
 const elementData = reactive<ElementData>(cloneDeep(props.element.data));
@@ -177,11 +188,17 @@ const updateGroupName = (key: string, value: string) =>
   (elementData.groups[key] = value);
 
 const removeGroup = (groupKey: string) => {
-  elementData.correct[groupKey].forEach(
-    (key: string) => delete elementData.answers[key],
-  );
-  delete elementData.groups[groupKey];
-  delete elementData.correct[groupKey];
+  return eventBus.channel('app').emit('showConfirmationModal', {
+    title: 'Delete answer group',
+    message: 'Are you sure you want to delete this answer group?',
+    action: () => {
+      elementData.correct[groupKey].forEach(
+        (key: string) => delete elementData.answers[key],
+      );
+      delete elementData.groups[groupKey];
+      delete elementData.correct[groupKey];
+    },
+  });
 };
 
 const save = async () => {

@@ -5,12 +5,12 @@
     validate-on="submit"
     @submit.prevent="save"
   >
+    <div class="text-subtitle-2 mb-2">Question</div>
     <RichTextEditor
       v-model="elementData.question"
       :readonly="isDisabled"
       :rules="[requiredRule]"
       class="my-3"
-      label="Question"
       variant="outlined"
     />
     <div class="text-subtitle-2 mb-2">Answer groups</div>
@@ -101,6 +101,7 @@
         Add Answer Group
       </VBtn>
     </div>
+    <div class="text-subtitle-2 mb-2">Hint</div>
     <VTextField
       v-model="elementData.hint"
       :clearable="!isDisabled"

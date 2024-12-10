@@ -57,7 +57,11 @@ export function onUserInteraction(
   // Simulate user state update within CEK
   if (IS_CEK) {
     // Can be reset to initial / mocked state via UI
-    Object.assign(context, { response: payload.response, isCorrect });
+    Object.assign(context, {
+      response: payload.response,
+      isCorrect,
+      isSubmitted: true,
+    });
   }
   // Can have arbitrary return value (interpreted by target system)
   // FE is updated if updateDisplayState is true

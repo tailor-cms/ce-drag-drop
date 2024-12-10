@@ -1,5 +1,11 @@
 # @tailor-cms/ce-drag-drop-manifest
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated validation messages and btn icon sizes.
+
 ## 0.0.3
 
 ### Patch Changes

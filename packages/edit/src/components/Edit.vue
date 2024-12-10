@@ -13,89 +13,90 @@
     @update="updateData($event)"
   >
     <div class="text-left text-subtitle-2 mb-2">Answer groups</div>
-    <VSlideYTransition group>
-      <VSheet
-        v-for="(groupName, groupKey, index) in elementData.groups"
-        :key="groupKey"
-        class="pa-4 mb-4"
-        rounded="lg"
-        border
-      >
-        <div class="d-flex mb-4">
-          <VAvatar
-            class="font-weight-bold"
-            color="primary-darken-3"
-            size="small"
-          >
-            {{ index + 1 }}
-          </VAvatar>
-          <VSpacer />
-          <VBtn
-            v-if="!isDisabled && groupCount > 2"
-            class="ml-2"
-            color="secondary-darken-1"
-            prepend-icon="mdi-delete"
-            size="small"
-            variant="text"
-            @click="removeGroup(groupKey)"
-          >
-            Delete Group
-          </VBtn>
-        </div>
-        <VTextField
-          :model-value="groupName"
-          :readonly="isDisabled"
-          :rules="[requiredRule]"
-          class="mt-2"
-          label="Group name"
-          variant="outlined"
-          @update:model-value="updateGroupName(groupKey, $event)"
-        />
-        <VSlideYTransition group>
+    <div class="d-flex flex-column ga-6">
+      <VSlideYTransition group>
+        <div
+          v-for="(groupName, groupKey, index) in elementData.groups"
+          :key="groupKey"
+        >
           <VTextField
-            v-for="(answer, answerKey) in getAnswers(groupKey)"
-            :key="answerKey"
-            :model-value="answer"
+            :model-value="groupName"
             :readonly="isDisabled"
             :rules="[requiredRule]"
             class="mt-2"
-            placeholder="Answer..."
+            label="Group name"
             variant="outlined"
-            @update:model-value="updateAnswer(answerKey, $event)"
+            @update:model-value="updateGroupName(groupKey, $event)"
           >
-            <template v-if="!isDisabled && answerCount(groupKey) > 1" #append>
+            <template #prepend>
+              <VAvatar
+                :text="index + 1"
+                class="font-weight-bold"
+                color="primary-darken-3"
+                size="small"
+              />
+            </template>
+            <template v-if="showDeleteGroup" #append>
               <VBtn
-                aria-label="Remove answer"
-                color="primary-darken-4"
+                color="secondary-lighten-1"
                 density="comfortable"
-                icon="mdi-close"
-                variant="text"
-                @click="removeAnswer(groupKey, answerKey)"
+                icon="mdi-delete-outline"
+                variant="tonal"
+                @click="removeGroup(groupKey)"
               />
             </template>
           </VTextField>
-        </VSlideYTransition>
-        <div v-if="!isDisabled" class="d-flex justify-end">
-          <VBtn
-            color="primary-darken-4"
-            prepend-icon="mdi-plus"
-            variant="text"
-            @click="addAnswer(groupKey)"
-          >
-            Add Answer
-          </VBtn>
+          <div :class="{ 'mr-13': showDeleteGroup }" class="ml-12">
+            <VSlideYTransition group>
+              <VTextField
+                v-for="(answer, answerKey) in getAnswers(groupKey)"
+                :key="answerKey"
+                :model-value="answer"
+                :readonly="isDisabled"
+                :rules="[requiredRule]"
+                class="mt-2"
+                placeholder="Answer..."
+                variant="outlined"
+                @update:model-value="updateAnswer(answerKey, $event)"
+              >
+                <template
+                  v-if="!isDisabled && answerCount(groupKey) > 1"
+                  #append
+                >
+                  <VBtn
+                    aria-label="Remove answer"
+                    color="primary-darken-4"
+                    density="comfortable"
+                    icon="mdi-close"
+                    variant="text"
+                    @click="removeAnswer(groupKey, answerKey)"
+                  />
+                </template>
+              </VTextField>
+            </VSlideYTransition>
+            <div v-if="!isDisabled" class="d-flex justify-end">
+              <VBtn
+                color="primary-darken-4"
+                prepend-icon="mdi-plus"
+                variant="text"
+                @click="addAnswer(groupKey)"
+              >
+                Add Answer
+              </VBtn>
+            </div>
+          </div>
         </div>
-      </VSheet>
-    </VSlideYTransition>
+      </VSlideYTransition>
+    </div>
     <div v-if="!isDisabled" class="d-flex justify-center mb-4">
       <VBtn
         color="primary-darken-4"
-        prepend-icon="mdi-plus"
+        prepend-icon="mdi-folder-plus"
         variant="text"
         rounded
         @click="addGroup"
       >
-        Add Group
+        Add Answer Group
       </VBtn>
     </div>
   </QuestionContainer>
@@ -126,6 +127,9 @@ const eventBus = inject('$eventBus') as any;
 const elementData = reactive<ElementData>(cloneDeep(props.element.data));
 const isDirty = computed(() => !isEqual(elementData, props.element.data));
 const groupCount = computed(() => size(elementData.groups));
+const showDeleteGroup = computed(
+  () => !props.isDisabled && groupCount.value > 2,
+);
 
 const getAnswers = (groupKey: string) => {
   const keys = elementData.correct[groupKey];

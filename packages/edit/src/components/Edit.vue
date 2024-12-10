@@ -1,19 +1,18 @@
 <template>
-  <VForm
-    ref="form"
-    class="tce-drag-drop my-4"
-    validate-on="submit"
-    @submit.prevent="save"
+  <QuestionContainer
+    v-bind="{
+      allowedEmbedTypes,
+      elementData,
+      isDirty,
+      isDisabled,
+      isGradeable,
+    }"
+    :show-feedback="false"
+    @cancel="updateData(element.data)"
+    @save="save"
+    @update="updateData($event)"
   >
-    <div class="text-subtitle-2 mb-2">Question</div>
-    <RichTextEditor
-      v-model="elementData.question"
-      :readonly="isDisabled"
-      :rules="[requiredRule]"
-      class="my-3"
-      variant="outlined"
-    />
-    <div class="text-subtitle-2 mb-2">Answer groups</div>
+    <div class="text-left text-subtitle-2 mb-2">Answer groups</div>
     <VSlideYTransition group>
       <VSheet
         v-for="(groupName, groupKey, index) in elementData.groups"
@@ -23,15 +22,13 @@
         border
       >
         <div class="d-flex mb-4">
-          <VChip
+          <VAvatar
             class="font-weight-bold"
             color="primary-darken-3"
             size="small"
-            variant="flat"
-            label
           >
             {{ index + 1 }}
-          </VChip>
+          </VAvatar>
           <VSpacer />
           <VBtn
             v-if="!isDisabled && groupCount > 2"
@@ -42,7 +39,7 @@
             variant="text"
             @click="removeGroup(groupKey)"
           >
-            Delete answer group
+            Delete Group
           </VBtn>
         </div>
         <VTextField
@@ -78,7 +75,7 @@
             </template>
           </VTextField>
         </VSlideYTransition>
-        <div v-if="!isDisabled" class="mb-4 d-flex justify-end">
+        <div v-if="!isDisabled" class="d-flex justify-end">
           <VBtn
             color="primary-darken-4"
             prepend-icon="mdi-plus"
@@ -90,7 +87,7 @@
         </div>
       </VSheet>
     </VSlideYTransition>
-    <div v-if="!isDisabled" class="d-flex justify-center mb-12">
+    <div v-if="!isDisabled" class="d-flex justify-center mb-4">
       <VBtn
         color="primary-darken-4"
         prepend-icon="mdi-plus"
@@ -98,62 +95,36 @@
         rounded
         @click="addGroup"
       >
-        Add Answer Group
+        Add Group
       </VBtn>
     </div>
-    <div class="text-subtitle-2 mb-2">Hint</div>
-    <VTextField
-      v-model="elementData.hint"
-      :clearable="!isDisabled"
-      :readonly="isDisabled"
-      placeholder="Optional hint..."
-      variant="outlined"
-    />
-    <div v-if="!isDisabled" class="d-flex justify-end">
-      <VBtn
-        :disabled="isDirty"
-        color="primary-darken-4"
-        variant="text"
-        @click="cancel"
-      >
-        Cancel
-      </VBtn>
-      <VBtn
-        :disabled="isDirty"
-        class="ml-2"
-        color="primary-darken-3"
-        type="submit"
-        variant="tonal"
-      >
-        Save
-      </VBtn>
-    </div>
-  </VForm>
+  </QuestionContainer>
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, reactive, ref, watch } from 'vue';
+import { computed, inject, reactive, watch } from 'vue';
 import { Element, ElementData } from '@tailor-cms/ce-drag-drop-manifest';
 import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
 import pick from 'lodash/pick';
 import pull from 'lodash/pull';
-import { RichTextEditor } from '@tailor-cms/core-components';
+import { QuestionContainer } from '@tailor-cms/core-components';
 import size from 'lodash/size';
 import { v4 as uuid } from 'uuid';
 
 const emit = defineEmits(['save']);
 const props = defineProps<{
+  allowedEmbedTypes: string[];
   element: Element;
   isFocused: boolean;
   isDisabled: boolean;
+  isGradeable: boolean;
 }>();
 
 const eventBus = inject('$eventBus') as any;
 
-const form = ref<HTMLFormElement>();
 const elementData = reactive<ElementData>(cloneDeep(props.element.data));
-const isDirty = computed(() => isEqual(elementData, props.element.data));
+const isDirty = computed(() => !isEqual(elementData, props.element.data));
 const groupCount = computed(() => size(elementData.groups));
 
 const getAnswers = (groupKey: string) => {
@@ -202,24 +173,16 @@ const removeGroup = (groupKey: string) => {
   });
 };
 
-const save = async () => {
-  const { valid } = await form.value?.validate();
-  if (valid) emit('save', elementData);
-};
-
-const cancel = () => {
-  Object.assign(elementData, cloneDeep(props.element.data));
-  form.value?.resetValidation();
+const save = () => emit('save', elementData);
+const updateData = (data: ElementData) => {
+  Object.assign(elementData, cloneDeep(data));
 };
 
 const requiredRule = (val: string | boolean | number) => {
   return !!val || 'The field is required';
 };
 
-watch(
-  () => props.element.data,
-  (data) => Object.assign(elementData, cloneDeep(data)),
-);
+watch(() => props.element.data, updateData);
 </script>
 
 <style lang="scss" scoped>

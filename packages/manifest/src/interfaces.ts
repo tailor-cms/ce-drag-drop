@@ -1,5 +1,6 @@
 export interface ElementData {
-  question: string;
+  embeds: Record<string, any>;
+  question: string[];
   groups: Record<string, string>;
   answers: Record<string, string>;
   correct: Record<string, string[]>;
@@ -33,6 +34,7 @@ export interface ElementManifest {
   name: string;
   ssr: boolean;
   isQuestion?: boolean;
+  isComposite?: boolean;
   initState: DataInitializer;
   Edit?: object;
   TopToolbar?: object;

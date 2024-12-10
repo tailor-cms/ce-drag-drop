@@ -17,7 +17,8 @@ export const name = 'Drag & Drop';
 // Function which inits element state (data property on the Content Element
 // entity)
 export const initState: DataInitializer = (): ElementData => ({
-  question: '',
+  embeds: {},
+  question: [],
   groups: {
     [uuid1]: '',
     [uuid2]: '',
@@ -51,6 +52,7 @@ const manifest: ElementManifest = {
   name,
   ssr: false,
   isQuestion: true,
+  isComposite: true,
   initState,
   ui,
 };

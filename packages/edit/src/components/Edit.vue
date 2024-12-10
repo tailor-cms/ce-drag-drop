@@ -30,11 +30,12 @@
           >
             <template #prepend>
               <VAvatar
-                :text="index + 1"
                 class="font-weight-bold"
                 color="primary-darken-3"
                 size="small"
-              />
+              >
+                {{ index + 1 }}
+              </VAvatar>
             </template>
             <template v-if="showDeleteGroup" #append>
               <VBtn

@@ -22,7 +22,7 @@
           <VTextField
             :model-value="groupName"
             :readonly="isDisabled"
-            :rules="[requiredRule]"
+            :rules="[(val: string) => !!val || 'Group name is required']"
             class="mt-2"
             label="Group name"
             variant="outlined"
@@ -40,21 +40,23 @@
             <template v-if="showDeleteGroup" #append>
               <VBtn
                 color="secondary-lighten-1"
-                density="comfortable"
-                icon="mdi-delete-outline"
+                size="x-small"
                 variant="tonal"
+                icon
                 @click="removeGroup(groupKey)"
-              />
+              >
+                <VIcon icon="mdi-delete-outline" size="large" />
+              </VBtn>
             </template>
           </VTextField>
-          <div :class="{ 'mr-13': showDeleteGroup }" class="ml-12">
+          <div :class="{ 'mr-12': showDeleteGroup }" class="ml-12">
             <VSlideYTransition group>
               <VTextField
                 v-for="(answer, answerKey) in getAnswers(groupKey)"
                 :key="answerKey"
                 :model-value="answer"
                 :readonly="isDisabled"
-                :rules="[requiredRule]"
+                :rules="[(val: string) => !!val || 'Answer is required']"
                 class="mt-2"
                 placeholder="Answer..."
                 variant="outlined"
@@ -67,11 +69,13 @@
                   <VBtn
                     aria-label="Remove answer"
                     color="primary-darken-4"
-                    density="comfortable"
-                    icon="mdi-close"
+                    size="x-small"
                     variant="text"
+                    icon
                     @click="removeAnswer(groupKey, answerKey)"
-                  />
+                  >
+                    <VIcon icon="mdi-close" size="large" />
+                  </VBtn>
                 </template>
               </VTextField>
             </VSlideYTransition>
@@ -181,10 +185,6 @@ const removeGroup = (groupKey: string) => {
 const save = () => emit('save', elementData);
 const updateData = (data: ElementData) => {
   Object.assign(elementData, cloneDeep(data));
-};
-
-const requiredRule = (val: string | boolean | number) => {
-  return !!val || 'The field is required';
 };
 
 watch(() => props.element.data, updateData);

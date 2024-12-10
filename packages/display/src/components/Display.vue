@@ -152,7 +152,7 @@ const iconProps = (groupId: string, answerId: string) => {
 };
 
 const answersRule = (val: string[]) => {
-  return !val.length || 'All the answers must be used.';
+  return !val.length || 'All the answers must be used';
 };
 
 const submit = () => emit('interaction', { response: userAnswer.value });

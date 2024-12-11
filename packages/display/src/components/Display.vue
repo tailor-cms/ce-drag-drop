@@ -160,8 +160,8 @@ const submit = () => emit('interaction', { response: userAnswer.value });
 watch(
   () => props.userState,
   (state = {}) => {
-    isSubmitted.value = 'isCorrect' in state;
     userAnswer.value = initializeUserAnswer();
+    isSubmitted.value = !!state.isSubmitted;
   },
   { deep: true },
 );

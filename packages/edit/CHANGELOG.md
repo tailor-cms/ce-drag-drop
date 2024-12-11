@@ -1,5 +1,11 @@
 # @tailor-cms/ce-drag-drop-edit
 
+## 0.0.5
+
+### Patch Changes
+
+- Pinned playwright version in github actions.
+
 ## 0.0.4
 
 ### Patch Changes

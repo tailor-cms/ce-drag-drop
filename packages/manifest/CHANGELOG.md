@@ -1,5 +1,11 @@
 # @tailor-cms/ce-drag-drop-manifest
 
+## 0.0.6
+
+### Patch Changes
+
+- Fixed condition for isSubmitted flag in Display component.
+
 ## 0.0.5
 
 ### Patch Changes

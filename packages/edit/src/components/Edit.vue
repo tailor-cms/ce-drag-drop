@@ -1,11 +1,12 @@
 <template>
   <QuestionContainer
     v-bind="{
-      allowedEmbedTypes,
+      type: manifest.name,
+      icon: manifest.ui.icon,
+      embedTypes,
       elementData,
       isDirty,
       isDisabled,
-      isGradeable,
     }"
     :show-feedback="false"
     @cancel="updateData(element.data)"
@@ -109,7 +110,10 @@
 
 <script lang="ts" setup>
 import { computed, inject, reactive, watch } from 'vue';
-import { Element, ElementData } from '@tailor-cms/ce-drag-drop-manifest';
+import manifest, {
+  Element,
+  ElementData,
+} from '@tailor-cms/ce-drag-drop-manifest';
 import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
 import pick from 'lodash/pick';
@@ -120,11 +124,10 @@ import { v4 as uuid } from 'uuid';
 
 const emit = defineEmits(['save']);
 const props = defineProps<{
-  allowedEmbedTypes: string[];
+  embedTypes: any[];
   element: Element;
   isFocused: boolean;
   isDisabled: boolean;
-  isGradeable: boolean;
 }>();
 
 const eventBus = inject('$eventBus') as any;

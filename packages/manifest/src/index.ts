@@ -53,6 +53,7 @@ const manifest: ElementManifest = {
   ssr: false,
   isQuestion: true,
   isComposite: true,
+  isGradable: true,
   initState,
   ui,
 };

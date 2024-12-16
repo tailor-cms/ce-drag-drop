@@ -1,5 +1,11 @@
 # @tailor-cms/ce-drag-drop-edit
 
+## 0.0.7
+
+### Patch Changes
+
+- Refactored isGradable handling, by storing it directly in element data.
+
 ## 0.0.6
 
 ### Patch Changes

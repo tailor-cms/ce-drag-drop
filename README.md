@@ -1,7 +1,8 @@
-# tce-template
+# ce-drag-drop
 
-Base template for Tailor Content Element Kit. For more details see
-[docs](https://tailor-cms.github.io/xt/).
+Tailor drag & drop content element component.
+
+Make sure to set TAILOR_NEXT=true .env variable to enable Vue 3 based authoring runtime.
 
 ## Usage
 

@@ -17,7 +17,8 @@ export const name = 'Drag & Drop';
 // Function which inits element state (data property on the Content Element
 // entity)
 export const initState: DataInitializer = (): ElementData => ({
-  question: '',
+  embeds: {},
+  question: [],
   groups: {
     [uuid1]: '',
     [uuid2]: '',
@@ -30,6 +31,7 @@ export const initState: DataInitializer = (): ElementData => ({
     [uuid1]: [uuid3],
     [uuid2]: [uuid4],
   },
+  hint: '',
 });
 
 // Can be loaded from package.json
@@ -44,18 +46,16 @@ const ui = {
   forceFullWidth: true,
 };
 
-export const mocks = {
-  displayContexts: [{ name: 'No selection', data: {} }],
-};
-
 const manifest: ElementManifest = {
   type,
   version: '1.0',
   name,
   ssr: false,
+  isQuestion: true,
+  isComposite: true,
+  isGradable: true,
   initState,
   ui,
-  mocks,
 };
 
 export default manifest;

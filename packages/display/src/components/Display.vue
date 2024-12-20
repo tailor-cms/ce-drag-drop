@@ -1,23 +1,39 @@
 <template>
-  <VForm ref="form" class="tce-root" @submit.prevent="submit">
-    <div class="px-2 my-4">{{ data.question }}</div>
+  <QuestionContainer
+    :data="data"
+    :is-correct="userState.isCorrect"
+    :is-submitted="isSubmitted"
+    allowed-retake
+    is-graded
+    @retry="isSubmitted = false"
+    @submit="submit"
+  >
     <VRow class="mb-2">
       <VCol cols="12">
+        <div class="text-subtitle-2 mb-2">
+          Drag the answers to the correct group:
+        </div>
         <VInput
           :model-value="answers"
           :rules="[answersRule]"
           hide-details="auto"
           validate-on="submit"
         >
-          <VCard class="w-100" color="blue-grey-lighten-4" variant="flat">
-            <VCardTitle>Answers</VCardTitle>
-            <VDivider />
+          <VCard
+            class="pa-4 w-100"
+            color="grey-lighten-5"
+            min-height="160"
+            variant="flat"
+            border
+          >
+            <div class="text-subtitle-2 mb-2">Answers</div>
             <Draggable :list="answers" v-bind="draggableOptions">
               <template #item="{ element: answerId }">
                 <VCard
-                  :class="{ draggable: !submitted }"
+                  :class="{ draggable: !isSubmitted }"
                   class="w-100"
                   variant="flat"
+                  border
                 >
                   <VCardText class="text-subtitle-1">
                     {{ data.answers[answerId] }}
@@ -32,22 +48,29 @@
         v-for="{ id: groupId, group } in groupsCollection"
         :key="groupId"
         :cols="12 / config.groupsPerRow"
+        class="d-flex flex-column"
       >
-        <VCard class="h-100" color="blue-grey-lighten-4" variant="flat">
-          <VCardTitle>{{ group }}</VCardTitle>
-          <VDivider />
+        <VCard
+          class="flex-grow-1 pa-4"
+          color="grey-lighten-5"
+          min-height="160"
+          variant="flat"
+          border
+        >
+          <div class="text-subtitle-2 mb-2">{{ group }}</div>
           <Draggable :list="userAnswer[groupId]" v-bind="draggableOptions">
             <template #item="{ element: answerId }">
               <VCard
-                :class="{ draggable: !submitted }"
+                :class="{ draggable: !isSubmitted }"
                 class="w-100 d-flex"
                 variant="flat"
+                border
               >
                 <VCardText class="text-subtitle-1">
                   {{ data.answers[answerId] }}
                 </VCardText>
                 <VBtn
-                  v-if="!submitted"
+                  v-if="!isSubmitted"
                   class="ma-2"
                   density="comfortable"
                   icon="mdi-close"
@@ -66,19 +89,7 @@
         </VCard>
       </VCol>
     </VRow>
-    <VAlert
-      v-if="submitted"
-      :text="userState?.isCorrect ? 'Correct' : 'Incorrect'"
-      :type="userState?.isCorrect ? 'success' : 'error'"
-      class="mb-3"
-      rounded="lg"
-      variant="tonal"
-    />
-    <div class="d-flex justify-end">
-      <VBtn v-if="!submitted" type="submit" variant="tonal">Submit</VBtn>
-      <VBtn v-else variant="tonal" @click="submitted = false">Try Again</VBtn>
-    </div>
-  </VForm>
+  </QuestionContainer>
 </template>
 
 <script setup lang="ts">
@@ -91,6 +102,7 @@ import flatMap from 'lodash/flatMap';
 import map from 'lodash/map';
 import mapValues from 'lodash/mapValues';
 import pull from 'lodash/pull';
+import { QuestionContainer } from '@tailor-cms/lx-components';
 import shuffle from 'lodash/shuffle';
 import uniqueId from 'lodash/uniqueId';
 
@@ -108,8 +120,7 @@ const initializeAnswers = () => {
 const props = defineProps<{ id: number; data: ElementData; userState: any }>();
 const emit = defineEmits(['interaction']);
 
-const form = ref<HTMLFormElement>();
-const submitted = ref('isCorrect' in (props.userState ?? {}));
+const isSubmitted = ref(!!props.userState.isSubmitted);
 const answers = ref(initializeAnswers());
 const userAnswer = ref(initializeUserAnswer());
 
@@ -120,7 +131,7 @@ const config = computed(() => ({
 const draggableOptions = computed(() => ({
   class: 'box',
   itemKey: 'id',
-  disabled: submitted.value,
+  disabled: isSubmitted.value,
   group: `dragDrop-${uniqueId()}`,
   animation: 150,
 }));
@@ -134,11 +145,6 @@ const removeAnswer = (id: string, answerId: any) => {
   answers.value.push(answerId);
 };
 
-const submit = async () => {
-  const { valid } = await form.value?.validate();
-  if (valid) emit('interaction', { response: userAnswer.value });
-};
-
 const iconProps = (groupId: string, answerId: string) => {
   const isCorrect = props.userState?.correct?.[groupId].includes(answerId);
   if (isCorrect) return { icon: 'mdi-check-circle', color: 'success' };
@@ -146,14 +152,16 @@ const iconProps = (groupId: string, answerId: string) => {
 };
 
 const answersRule = (val: string[]) => {
-  return !val.length || 'All the answers must be used.';
+  return !val.length || 'All the answers must be used';
 };
+
+const submit = () => emit('interaction', { response: userAnswer.value });
 
 watch(
   () => props.userState,
   (state = {}) => {
-    submitted.value = 'isCorrect' in state;
     userAnswer.value = initializeUserAnswer();
+    isSubmitted.value = !!state.isSubmitted;
   },
   { deep: true },
 );
@@ -171,15 +179,8 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-.tce-root {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1rem;
-}
-
 .box {
-  padding: 1rem;
   height: 100%;
-  min-height: 2.5rem;
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;

@@ -3,8 +3,8 @@
     v-bind="{
       type: manifest.name,
       icon: manifest.ui.icon,
-      embedTypes,
       elementData,
+      embedElementConfig,
       isDirty,
       isDisabled,
     }"
@@ -124,8 +124,8 @@ import { v4 as uuid } from 'uuid';
 
 const emit = defineEmits(['save']);
 const props = defineProps<{
-  embedTypes: any[];
   element: Element;
+  embedElementConfig: any[];
   isFocused: boolean;
   isDisabled: boolean;
 }>();

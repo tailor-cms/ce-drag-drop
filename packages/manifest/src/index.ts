@@ -9,7 +9,7 @@ import type {
 const [uuid1, uuid2, uuid3, uuid4] = Array.from({ length: 4 }, () => uuid());
 
 // Element unique id within the target system (e.g. Tailor)
-export const type = 'CE_DRAG_DROP';
+export const type = 'DRAG_DROP';
 
 // Display name (e.g. shown to the author)
 export const name = 'Drag & Drop';

@@ -1,10 +1,6 @@
 <template>
   <QuestionContainer
-    v-bind="{
-      elementData,
-      embedElementConfig,
-      isDisabled,
-    }"
+    v-bind="{ elementData, embedElementConfig, isDisabled }"
     :show-feedback="false"
     @update="emit('update', $event)"
   >

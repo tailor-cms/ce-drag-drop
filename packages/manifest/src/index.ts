@@ -18,7 +18,6 @@ export const name = 'Drag & Drop';
 // entity)
 export const initState: DataInitializer = (): ElementData => ({
   embeds: {},
-  question: [],
   groups: {
     [uuid1]: '',
     [uuid2]: '',

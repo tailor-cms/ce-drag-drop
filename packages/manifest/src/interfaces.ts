@@ -1,7 +1,6 @@
 export interface ElementData {
   isGradable?: boolean;
   embeds: Record<string, any>;
-  question: string[];
   groups: Record<string, string>;
   answers: Record<string, string>;
   correct: Record<string, string[]>;

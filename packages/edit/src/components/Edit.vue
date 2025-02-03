@@ -1,17 +1,8 @@
 <template>
   <QuestionContainer
-    v-bind="{
-      type: manifest.name,
-      icon: manifest.ui.icon,
-      elementData,
-      embedElementConfig,
-      isDirty,
-      isDisabled,
-    }"
+    v-bind="{ elementData, embedElementConfig, isDisabled }"
     :show-feedback="false"
-    @cancel="updateData(element.data)"
-    @save="save"
-    @update="updateData($event)"
+    @update="emit('update', $event)"
   >
     <div class="text-left text-subtitle-2 mb-2">Answer groups</div>
     <div class="d-flex flex-column ga-6">
@@ -109,88 +100,89 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, reactive, watch } from 'vue';
-import manifest, {
-  Element,
-  ElementData,
-} from '@tailor-cms/ce-drag-drop-manifest';
+import { computed, inject } from 'vue';
 import cloneDeep from 'lodash/cloneDeep';
-import isEqual from 'lodash/isEqual';
+import { Element } from '@tailor-cms/ce-drag-drop-manifest';
 import pick from 'lodash/pick';
 import pull from 'lodash/pull';
 import { QuestionContainer } from '@tailor-cms/core-components';
 import size from 'lodash/size';
 import { v4 as uuid } from 'uuid';
 
-const emit = defineEmits(['save']);
 const props = defineProps<{
   element: Element;
   embedElementConfig: any[];
   isFocused: boolean;
   isDisabled: boolean;
 }>();
+const emit = defineEmits(['save', 'update']);
 
 const eventBus = inject('$eventBus') as any;
 
-const elementData = reactive<ElementData>(cloneDeep(props.element.data));
-const isDirty = computed(() => !isEqual(elementData, props.element.data));
-const groupCount = computed(() => size(elementData.groups));
+const elementData = computed(() => props.element.data);
+const groupCount = computed(() => size(elementData.value.groups));
 const showDeleteGroup = computed(
   () => !props.isDisabled && groupCount.value > 2,
 );
 
 const getAnswers = (groupKey: string) => {
-  const keys = elementData.correct[groupKey];
-  return pick(elementData.answers, keys);
+  const keys = elementData.value.correct[groupKey];
+  return pick(elementData.value.answers, keys);
 };
 
-const answerCount = (groupKey: string) => size(elementData.correct[groupKey]);
+const answerCount = (groupKey: string) =>
+  size(elementData.value.correct[groupKey]);
 
 const addAnswer = (groupKey: string) => {
+  const { answers, correct } = cloneDeep(elementData.value);
   const answerKey = uuid();
-  elementData.answers[answerKey] = '';
-  elementData.correct[groupKey].push(answerKey);
+  answers[answerKey] = '';
+  correct[groupKey].push(answerKey);
+  emit('update', { answers, correct });
 };
 
 const removeAnswer = (groupKey: string, answerKey: string) => {
-  delete elementData.answers[groupKey];
-  pull(elementData.correct[groupKey], answerKey);
+  const { answers, correct } = cloneDeep(elementData.value);
+  delete answers[answerKey];
+  pull(correct[groupKey], answerKey);
+  emit('update', { answers, correct });
 };
 
-const updateAnswer = (key: string, value: string) =>
-  (elementData.answers[key] = value);
+const updateAnswer = (key: string, value: string) => {
+  const answers = cloneDeep(elementData.value.answers);
+  answers[key] = value;
+  emit('update', { answers });
+};
 
 const addGroup = () => {
+  const { groups, answers, correct } = cloneDeep(elementData.value);
   const groupKey = uuid();
   const answerKey = uuid();
-  elementData.groups[groupKey] = '';
-  elementData.answers[answerKey] = '';
-  elementData.correct[groupKey] = [answerKey];
+  groups[groupKey] = '';
+  answers[answerKey] = '';
+  correct[groupKey] = [answerKey];
+  emit('update', { groups, answers, correct });
 };
 
-const updateGroupName = (key: string, value: string) =>
-  (elementData.groups[key] = value);
+const updateGroupName = (key: string, value: string) => {
+  const groups = cloneDeep(elementData.value.groups);
+  groups[key] = value;
+  emit('update', { groups });
+};
 
 const removeGroup = (groupKey: string) => {
   return eventBus.channel('app').emit('showConfirmationModal', {
     title: 'Delete answer group',
     message: 'Are you sure you want to delete this answer group?',
     action: () => {
-      elementData.correct[groupKey].forEach(
-        (key: string) => delete elementData.answers[key],
-      );
-      delete elementData.groups[groupKey];
-      delete elementData.correct[groupKey];
+      const { groups, answers, correct } = cloneDeep(elementData.value);
+      correct[groupKey].forEach((key: string) => delete answers[key]);
+      delete groups[groupKey];
+      delete correct[groupKey];
+      emit('update', { groups, answers, correct });
     },
   });
 };
-
-const save = () => emit('save', elementData);
-const updateData = (data: ElementData) => {
-  Object.assign(elementData, cloneDeep(data));
-};
-
-watch(() => props.element.data, updateData);
 </script>
 
 <style lang="scss" scoped>

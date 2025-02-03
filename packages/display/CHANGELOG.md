@@ -1,5 +1,17 @@
 # @tailor-cms/ce-drag-drop-display
 
+## 0.0.10
+
+### Patch Changes
+
+- Bumped core and lx components packages, removed redundant question prop in data.
+
+## 0.0.9
+
+### Patch Changes
+
+- Updated package to follow new question element component composition.
+
 ## 0.0.8
 
 ### Patch Changes

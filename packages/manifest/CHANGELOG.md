@@ -1,5 +1,11 @@
 # @tailor-cms/ce-drag-drop-manifest
 
+## 0.0.12
+
+### Patch Changes
+
+- Updated package icon.
+
 ## 0.0.11
 
 ### Patch Changes

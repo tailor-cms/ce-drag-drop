@@ -1,5 +1,11 @@
 # @tailor-cms/ce-drag-drop-display
 
+## 0.0.13
+
+### Patch Changes
+
+- Revert to old structutre with question prop.
+
 ## 0.0.12
 
 ### Patch Changes

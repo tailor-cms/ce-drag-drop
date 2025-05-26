@@ -1,5 +1,11 @@
 # @tailor-cms/ce-drag-drop-edit
 
+## 0.0.14
+
+### Patch Changes
+
+- Bumped to the latest tce-boot and core-components version and migrated code accordingly.
+
 ## 0.0.13
 
 ### Patch Changes

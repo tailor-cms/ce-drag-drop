@@ -1,6 +1,6 @@
 <template>
   <QuestionContainer
-    :data="data"
+    :data="element.data"
     :is-correct="userState.isCorrect"
     :is-submitted="isSubmitted"
     allowed-retake
@@ -36,7 +36,7 @@
                   border
                 >
                   <VCardText class="text-subtitle-1">
-                    {{ data.answers[answerId] }}
+                    {{ element.data.answers[answerId] }}
                   </VCardText>
                 </VCard>
               </template>
@@ -67,7 +67,7 @@
                 border
               >
                 <VCardText class="text-subtitle-1">
-                  {{ data.answers[answerId] }}
+                  {{ element.data.answers[answerId] }}
                 </VCardText>
                 <VBtn
                   v-if="!isSubmitted"
@@ -93,31 +93,33 @@
 </template>
 
 <script setup lang="ts">
+import {
+  cloneDeep,
+  difference,
+  flatMap,
+  map,
+  mapValues,
+  pull,
+  shuffle,
+  uniqueId,
+} from 'lodash-es';
 import { computed, ref, watch } from 'vue';
-import cloneDeep from 'lodash/cloneDeep';
-import difference from 'lodash/difference';
 import Draggable from 'vuedraggable/src/vuedraggable';
-import { ElementData } from '@tailor-cms/ce-drag-drop-manifest';
-import flatMap from 'lodash/flatMap';
-import map from 'lodash/map';
-import mapValues from 'lodash/mapValues';
-import pull from 'lodash/pull';
+import { Element } from '@tailor-cms/ce-drag-drop-manifest';
 import { QuestionContainer } from '@tailor-cms/lx-components';
-import shuffle from 'lodash/shuffle';
-import uniqueId from 'lodash/uniqueId';
 
 const initializeUserAnswer = () =>
   cloneDeep(props.userState?.response) ??
-  mapValues(props.data.groups, () => []);
+  mapValues(props.element.data.groups, () => []);
 
 const initializeAnswers = () => {
-  const answerIds = Object.keys(props.data.answers);
+  const answerIds = Object.keys(props.element.data.answers);
   const usedAnswerIds = flatMap(props.userState.response) as string[];
   const remainingAnswers = difference(answerIds, usedAnswerIds);
   return shuffle(remainingAnswers);
 };
 
-const props = defineProps<{ id: number; data: ElementData; userState: any }>();
+const props = defineProps<{ element: Element; userState: any }>();
 const emit = defineEmits(['interaction']);
 
 const isSubmitted = ref(!!props.userState.isSubmitted);
@@ -137,7 +139,7 @@ const draggableOptions = computed(() => ({
 }));
 
 const groupsCollection = computed(() => {
-  return map(props.data.groups, (group, id) => ({ id, group }));
+  return map(props.element.data.groups, (group, id) => ({ id, group }));
 });
 
 const removeAnswer = (id: string, answerId: any) => {
@@ -167,10 +169,10 @@ watch(
 );
 
 watch(
-  () => props.data.answers,
+  () => props.element.data.answers,
   () => {
     answers.value = initializeAnswers();
-    Object.keys(props.data.groups).forEach((groupId) => {
+    Object.keys(props.element.data.groups).forEach((groupId) => {
       if (!userAnswer.value[groupId]) userAnswer.value[groupId] = [];
     });
   },

@@ -5,14 +5,11 @@
     :is-submitted="isSubmitted"
     allowed-retake
     is-graded
-    @retry="isSubmitted = false"
+    @retry="retry"
     @submit="submit"
   >
-    <VRow class="mb-2">
+    <VRow class="mb-2" dense>
       <VCol cols="12">
-        <div class="text-subtitle-2 mb-2">
-          Drag the answers to the correct group:
-        </div>
         <VInput
           :model-value="answers"
           :rules="[answersRule]"
@@ -20,27 +17,24 @@
           validate-on="submit"
         >
           <VCard
-            class="pa-4 w-100"
-            color="grey-lighten-5"
+            class="answers d-flex flex-grow-1 flex-column w-100"
             min-height="160"
             variant="flat"
             border
           >
-            <div class="text-subtitle-2 mb-2">Answers</div>
-            <Draggable :list="answers" v-bind="draggableOptions">
-              <template #item="{ element: answerId }">
-                <VCard
-                  :class="{ draggable: !isSubmitted }"
-                  class="w-100"
-                  variant="flat"
-                  border
-                >
-                  <VCardText class="text-subtitle-1">
-                    {{ element.data.answers[answerId] }}
-                  </VCardText>
-                </VCard>
-              </template>
-            </Draggable>
+            <VCardTitle class="text-subtitle-2">Answers</VCardTitle>
+            <VDivider />
+            <VCardText>
+              <Draggable :list="answers" v-bind="draggableOptions">
+                <template #item="{ element: answerId }">
+                  <VChip
+                    :class="{ draggable: !isSubmitted }"
+                    :text="element.data.answers[answerId]"
+                    label
+                  />
+                </template>
+              </Draggable>
+            </VCardText>
           </VCard>
         </VInput>
       </VCol>
@@ -51,41 +45,26 @@
         class="d-flex flex-column"
       >
         <VCard
-          class="flex-grow-1 pa-4"
-          color="grey-lighten-5"
+          class="d-flex flex-grow-1 flex-column"
           min-height="160"
           variant="flat"
           border
         >
-          <div class="text-subtitle-2 mb-2">{{ group }}</div>
-          <Draggable :list="userAnswer[groupId]" v-bind="draggableOptions">
-            <template #item="{ element: answerId }">
-              <VCard
-                :class="{ draggable: !isSubmitted }"
-                class="w-100 d-flex"
-                variant="flat"
-                border
-              >
-                <VCardText class="text-subtitle-1">
-                  {{ element.data.answers[answerId] }}
-                </VCardText>
-                <VBtn
-                  v-if="!isSubmitted"
-                  class="ma-2"
-                  density="comfortable"
-                  icon="mdi-close"
-                  variant="text"
-                  @click="removeAnswer(groupId, answerId)"
+          <VCardTitle class="text-subtitle-2">{{ group }}</VCardTitle>
+          <VDivider />
+          <VCardText>
+            <Draggable :list="userAnswer[groupId]" v-bind="draggableOptions">
+              <template #item="{ element: answerId }">
+                <VChip
+                  v-bind="chipProps(groupId, answerId)"
+                  :class="{ draggable: !isSubmitted }"
+                  :text="element.data.answers[answerId]"
+                  label
+                  @click:close="removeAnswer(groupId, answerId)"
                 />
-                <VIcon
-                  v-else
-                  v-bind="iconProps(groupId, answerId)"
-                  class="ma-3"
-                  size="large"
-                />
-              </VCard>
-            </template>
-          </Draggable>
+              </template>
+            </Draggable>
+          </VCardText>
         </VCard>
       </VCol>
     </VRow>
@@ -108,9 +87,13 @@ import Draggable from 'vuedraggable/src/vuedraggable';
 import { Element } from '@tailor-cms/ce-drag-drop-manifest';
 import { QuestionContainer } from '@tailor-cms/lx-components';
 
-const initializeUserAnswer = () =>
-  cloneDeep(props.userState?.response) ??
-  mapValues(props.element.data.groups, () => []);
+const initializeUserAnswer = () => {
+  const response = cloneDeep(props.userState?.response) ?? {};
+  return mapValues(
+    props.element.data.groups,
+    (_, key: string) => response[key] || [],
+  );
+};
 
 const initializeAnswers = () => {
   const answerIds = Object.keys(props.element.data.answers);
@@ -147,10 +130,11 @@ const removeAnswer = (id: string, answerId: any) => {
   answers.value.push(answerId);
 };
 
-const iconProps = (groupId: string, answerId: string) => {
-  const isCorrect = props.userState?.correct?.[groupId].includes(answerId);
-  if (isCorrect) return { icon: 'mdi-check-circle', color: 'success' };
-  return { icon: 'mdi-close-circle', color: 'error' };
+const chipProps = (groupId: string, answerId: string) => {
+  const isCorrect = props.userState?.correct?.[groupId]?.includes(answerId);
+  if (!isSubmitted.value) return { closable: true };
+  if (isCorrect) return { prependIcon: 'mdi-check-circle', color: 'success' };
+  return { prependIcon: 'mdi-close-circle', color: 'error' };
 };
 
 const answersRule = (val: string[]) => {
@@ -158,6 +142,9 @@ const answersRule = (val: string[]) => {
 };
 
 const submit = () => emit('interaction', { response: userAnswer.value });
+const retry = () => {
+  isSubmitted.value = false;
+};
 
 watch(
   () => props.userState,
@@ -181,6 +168,10 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+.v-card-title {
+  font-weight: bold;
+}
+
 .box {
   height: 100%;
   display: flex;
@@ -188,8 +179,27 @@ watch(
   align-content: flex-start;
   gap: 0.5rem;
 
-  .v-card.draggable {
+  .v-chip.draggable {
     cursor: move;
+  }
+
+  .v-chip {
+    align-items: flex-start;
+    min-height: 2.125rem;
+    height: unset !important;
+    padding: 0.5rem 0.75rem !important;
+
+    :deep(.v-chip__content) {
+      white-space: wrap;
+      line-height: 1;
+      min-height: 1.125rem;
+    }
+  }
+}
+
+.answers {
+  .v-chip {
+    max-width: calc(50% - 4px);
   }
 }
 </style>

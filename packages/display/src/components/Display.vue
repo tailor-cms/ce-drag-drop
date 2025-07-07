@@ -25,7 +25,7 @@
             <VCardTitle class="text-subtitle-2">Answers</VCardTitle>
             <VDivider />
             <VCardText>
-              <Draggable :list="answers" v-bind="draggableOptions">
+              <Draggable v-bind="draggableOptions" :list="answers">
                 <template #item="{ element: answerId }">
                   <VChip
                     :class="{ draggable: !isSubmitted }"
@@ -53,7 +53,7 @@
           <VCardTitle class="text-subtitle-2">{{ group }}</VCardTitle>
           <VDivider />
           <VCardText>
-            <Draggable :list="userAnswer[groupId]" v-bind="draggableOptions">
+            <Draggable v-bind="draggableOptions" :list="userAnswer[groupId]">
               <template #item="{ element: answerId }">
                 <VChip
                   v-bind="chipProps(groupId, answerId)"
@@ -89,10 +89,10 @@ import { QuestionContainer } from '@tailor-cms/lx-components';
 
 const initializeUserAnswer = () => {
   const response = cloneDeep(props.userState?.response) ?? {};
-  return mapValues(
-    props.element.data.groups,
-    (_, key: string) => response[key] || [],
-  );
+  return mapValues(props.element.data.groups, (_, key: string) => {
+    const answers = Object.keys(props.element.data.answers);
+    return response[key]?.filter((it: string) => answers.includes(it)) || [];
+  });
 };
 
 const initializeAnswers = () => {
@@ -115,7 +115,7 @@ const config = computed(() => ({
 
 const draggableOptions = computed(() => ({
   class: 'box',
-  itemKey: 'id',
+  itemKey: (id: string) => id,
   disabled: isSubmitted.value,
   group: `dragDrop-${uniqueId()}`,
   animation: 150,
@@ -159,9 +159,7 @@ watch(
   () => props.element.data.answers,
   () => {
     answers.value = initializeAnswers();
-    Object.keys(props.element.data.groups).forEach((groupId) => {
-      if (!userAnswer.value[groupId]) userAnswer.value[groupId] = [];
-    });
+    userAnswer.value = initializeUserAnswer();
   },
   { deep: true },
 );

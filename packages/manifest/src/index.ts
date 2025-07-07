@@ -101,9 +101,16 @@ export const ai = {
         have the same number of answers.
       - 'hint' is an optional hint for the correct solution.
   `,
-  processResponse: (data: any) => {
+  processResponse: (val: any) => {
     const questionId = uuid();
-    const answers = data.groups.reduce(
+    const question = {
+      id: questionId,
+      data: { content: val.question },
+      embedded: true,
+      position: 1,
+      type: 'TIPTAP_HTML',
+    };
+    const answers = val.groups.reduce(
       (acc: Record<string, any>, { name, answers }: any) => {
         const groupId = uuid();
         acc.groups[groupId] = name;
@@ -119,18 +126,10 @@ export const ai = {
     );
     return {
       isGradable: true,
-      question: [questionId],
-      hint: data.hint || '',
+      hint: val.hint || '',
       ...answers,
-      embeds: {
-        [questionId]: {
-          id: questionId,
-          data: { content: data.question },
-          embedded: true,
-          position: 1,
-          type: 'TIPTAP_HTML',
-        },
-      },
+      question: [questionId],
+      embeds: { [questionId]: question },
     };
   },
 };

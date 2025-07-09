@@ -1,18 +1,15 @@
 <template>
   <QuestionContainer
-    :data="data"
+    :data="element.data"
     :is-correct="userState.isCorrect"
     :is-submitted="isSubmitted"
     allowed-retake
     is-graded
-    @retry="isSubmitted = false"
+    @retry="retry"
     @submit="submit"
   >
-    <VRow class="mb-2">
+    <VRow class="mb-2" dense>
       <VCol cols="12">
-        <div class="text-subtitle-2 mb-2">
-          Drag the answers to the correct group:
-        </div>
         <VInput
           :model-value="answers"
           :rules="[answersRule]"
@@ -20,27 +17,24 @@
           validate-on="submit"
         >
           <VCard
-            class="pa-4 w-100"
-            color="grey-lighten-5"
+            class="answers d-flex flex-grow-1 flex-column w-100"
             min-height="160"
             variant="flat"
             border
           >
-            <div class="text-subtitle-2 mb-2">Answers</div>
-            <Draggable :list="answers" v-bind="draggableOptions">
-              <template #item="{ element: answerId }">
-                <VCard
-                  :class="{ draggable: !isSubmitted }"
-                  class="w-100"
-                  variant="flat"
-                  border
-                >
-                  <VCardText class="text-subtitle-1">
-                    {{ data.answers[answerId] }}
-                  </VCardText>
-                </VCard>
-              </template>
-            </Draggable>
+            <VCardTitle class="text-subtitle-2">Answers</VCardTitle>
+            <VDivider />
+            <VCardText>
+              <Draggable v-bind="draggableOptions" :list="answers">
+                <template #item="{ element: answerId }">
+                  <VChip
+                    :class="{ draggable: !isSubmitted }"
+                    :text="element.data.answers[answerId]"
+                    label
+                  />
+                </template>
+              </Draggable>
+            </VCardText>
           </VCard>
         </VInput>
       </VCol>
@@ -51,41 +45,26 @@
         class="d-flex flex-column"
       >
         <VCard
-          class="flex-grow-1 pa-4"
-          color="grey-lighten-5"
+          class="d-flex flex-grow-1 flex-column"
           min-height="160"
           variant="flat"
           border
         >
-          <div class="text-subtitle-2 mb-2">{{ group }}</div>
-          <Draggable :list="userAnswer[groupId]" v-bind="draggableOptions">
-            <template #item="{ element: answerId }">
-              <VCard
-                :class="{ draggable: !isSubmitted }"
-                class="w-100 d-flex"
-                variant="flat"
-                border
-              >
-                <VCardText class="text-subtitle-1">
-                  {{ data.answers[answerId] }}
-                </VCardText>
-                <VBtn
-                  v-if="!isSubmitted"
-                  class="ma-2"
-                  density="comfortable"
-                  icon="mdi-close"
-                  variant="text"
-                  @click="removeAnswer(groupId, answerId)"
+          <VCardTitle class="text-subtitle-2">{{ group }}</VCardTitle>
+          <VDivider />
+          <VCardText>
+            <Draggable v-bind="draggableOptions" :list="userAnswer[groupId]">
+              <template #item="{ element: answerId }">
+                <VChip
+                  v-bind="chipProps(groupId, answerId)"
+                  :class="{ draggable: !isSubmitted }"
+                  :text="element.data.answers[answerId]"
+                  label
+                  @click:close="removeAnswer(groupId, answerId)"
                 />
-                <VIcon
-                  v-else
-                  v-bind="iconProps(groupId, answerId)"
-                  class="ma-3"
-                  size="large"
-                />
-              </VCard>
-            </template>
-          </Draggable>
+              </template>
+            </Draggable>
+          </VCardText>
         </VCard>
       </VCol>
     </VRow>
@@ -93,31 +72,37 @@
 </template>
 
 <script setup lang="ts">
+import {
+  cloneDeep,
+  difference,
+  flatMap,
+  map,
+  mapValues,
+  pull,
+  shuffle,
+  uniqueId,
+} from 'lodash-es';
 import { computed, ref, watch } from 'vue';
-import cloneDeep from 'lodash/cloneDeep';
-import difference from 'lodash/difference';
 import Draggable from 'vuedraggable/src/vuedraggable';
-import { ElementData } from '@tailor-cms/ce-drag-drop-manifest';
-import flatMap from 'lodash/flatMap';
-import map from 'lodash/map';
-import mapValues from 'lodash/mapValues';
-import pull from 'lodash/pull';
+import { Element } from '@tailor-cms/ce-drag-drop-manifest';
 import { QuestionContainer } from '@tailor-cms/lx-components';
-import shuffle from 'lodash/shuffle';
-import uniqueId from 'lodash/uniqueId';
 
-const initializeUserAnswer = () =>
-  cloneDeep(props.userState?.response) ??
-  mapValues(props.data.groups, () => []);
+const initializeUserAnswer = () => {
+  const response = cloneDeep(props.userState?.response) ?? {};
+  return mapValues(props.element.data.groups, (_, key: string) => {
+    const answers = Object.keys(props.element.data.answers);
+    return response[key]?.filter((it: string) => answers.includes(it)) || [];
+  });
+};
 
 const initializeAnswers = () => {
-  const answerIds = Object.keys(props.data.answers);
+  const answerIds = Object.keys(props.element.data.answers);
   const usedAnswerIds = flatMap(props.userState.response) as string[];
   const remainingAnswers = difference(answerIds, usedAnswerIds);
   return shuffle(remainingAnswers);
 };
 
-const props = defineProps<{ id: number; data: ElementData; userState: any }>();
+const props = defineProps<{ element: Element; userState: any }>();
 const emit = defineEmits(['interaction']);
 
 const isSubmitted = ref(!!props.userState.isSubmitted);
@@ -130,14 +115,14 @@ const config = computed(() => ({
 
 const draggableOptions = computed(() => ({
   class: 'box',
-  itemKey: 'id',
+  itemKey: (id: string) => id,
   disabled: isSubmitted.value,
   group: `dragDrop-${uniqueId()}`,
   animation: 150,
 }));
 
 const groupsCollection = computed(() => {
-  return map(props.data.groups, (group, id) => ({ id, group }));
+  return map(props.element.data.groups, (group, id) => ({ id, group }));
 });
 
 const removeAnswer = (id: string, answerId: any) => {
@@ -145,10 +130,11 @@ const removeAnswer = (id: string, answerId: any) => {
   answers.value.push(answerId);
 };
 
-const iconProps = (groupId: string, answerId: string) => {
-  const isCorrect = props.userState?.correct?.[groupId].includes(answerId);
-  if (isCorrect) return { icon: 'mdi-check-circle', color: 'success' };
-  return { icon: 'mdi-close-circle', color: 'error' };
+const chipProps = (groupId: string, answerId: string) => {
+  const isCorrect = props.userState?.correct?.[groupId]?.includes(answerId);
+  if (!isSubmitted.value) return { closable: true };
+  if (isCorrect) return { prependIcon: 'mdi-check-circle', color: 'success' };
+  return { prependIcon: 'mdi-close-circle', color: 'error' };
 };
 
 const answersRule = (val: string[]) => {
@@ -156,6 +142,9 @@ const answersRule = (val: string[]) => {
 };
 
 const submit = () => emit('interaction', { response: userAnswer.value });
+const retry = () => {
+  isSubmitted.value = false;
+};
 
 watch(
   () => props.userState,
@@ -167,18 +156,20 @@ watch(
 );
 
 watch(
-  () => props.data.answers,
+  () => props.element.data.answers,
   () => {
     answers.value = initializeAnswers();
-    Object.keys(props.data.groups).forEach((groupId) => {
-      if (!userAnswer.value[groupId]) userAnswer.value[groupId] = [];
-    });
+    userAnswer.value = initializeUserAnswer();
   },
   { deep: true },
 );
 </script>
 
 <style lang="scss" scoped>
+.v-card-title {
+  font-weight: bold;
+}
+
 .box {
   height: 100%;
   display: flex;
@@ -186,8 +177,27 @@ watch(
   align-content: flex-start;
   gap: 0.5rem;
 
-  .v-card.draggable {
+  .v-chip.draggable {
     cursor: move;
+  }
+
+  .v-chip {
+    align-items: flex-start;
+    min-height: 2.125rem;
+    height: unset !important;
+    padding: 0.5rem 0.75rem !important;
+
+    :deep(.v-chip__content) {
+      white-space: wrap;
+      line-height: 1;
+      min-height: 1.125rem;
+    }
+  }
+}
+
+.answers {
+  .v-chip {
+    max-width: calc(50% - 4px);
   }
 }
 </style>

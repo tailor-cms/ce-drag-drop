@@ -1,6 +1,6 @@
 <template>
   <QuestionContainer
-    v-bind="{ elementData, embedElementConfig, isDisabled }"
+    v-bind="{ elementData, embedElementConfig, isReadonly }"
     :show-feedback="false"
     @update="emit('update', $event)"
   >
@@ -13,7 +13,7 @@
         >
           <VTextField
             :model-value="groupName"
-            :readonly="isDisabled"
+            :readonly="isReadonly"
             :rules="[(val: string) => !!val || 'Group name is required']"
             class="mt-2"
             label="Group name"
@@ -47,7 +47,7 @@
                 v-for="(answer, answerKey) in getAnswers(groupKey)"
                 :key="answerKey"
                 :model-value="answer"
-                :readonly="isDisabled"
+                :readonly="isReadonly"
                 :rules="[(val: string) => !!val || 'Answer is required']"
                 class="mt-2"
                 placeholder="Answer..."
@@ -55,7 +55,7 @@
                 @update:model-value="updateAnswer(answerKey, $event)"
               >
                 <template
-                  v-if="!isDisabled && answerCount(groupKey) > 1"
+                  v-if="!isReadonly && answerCount(groupKey) > 1"
                   #append
                 >
                   <VBtn
@@ -71,7 +71,7 @@
                 </template>
               </VTextField>
             </VSlideYTransition>
-            <div v-if="!isDisabled" class="d-flex justify-end">
+            <div v-if="!isReadonly" class="d-flex justify-end">
               <VBtn
                 color="primary-darken-4"
                 prepend-icon="mdi-plus"
@@ -85,7 +85,7 @@
         </div>
       </VSlideYTransition>
     </div>
-    <div v-if="!isDisabled" class="d-flex justify-center mb-4">
+    <div v-if="!isReadonly" class="d-flex justify-center mb-4">
       <VBtn
         color="primary-darken-4"
         prepend-icon="mdi-folder-plus"
@@ -100,20 +100,18 @@
 </template>
 
 <script lang="ts" setup>
+import { cloneDeep, pick, pull, size } from 'lodash-es';
 import { computed, inject } from 'vue';
-import cloneDeep from 'lodash/cloneDeep';
 import { Element } from '@tailor-cms/ce-drag-drop-manifest';
-import pick from 'lodash/pick';
-import pull from 'lodash/pull';
 import { QuestionContainer } from '@tailor-cms/core-components';
-import size from 'lodash/size';
 import { v4 as uuid } from 'uuid';
 
 const props = defineProps<{
   element: Element;
   embedElementConfig: any[];
+  isDragged: boolean;
   isFocused: boolean;
-  isDisabled: boolean;
+  isReadonly: boolean;
 }>();
 const emit = defineEmits(['save', 'update']);
 
@@ -122,7 +120,7 @@ const eventBus = inject('$eventBus') as any;
 const elementData = computed(() => props.element.data);
 const groupCount = computed(() => size(elementData.value.groups));
 const showDeleteGroup = computed(
-  () => !props.isDisabled && groupCount.value > 2,
+  () => !props.isReadonly && groupCount.value > 2,
 );
 
 const getAnswers = (groupKey: string) => {

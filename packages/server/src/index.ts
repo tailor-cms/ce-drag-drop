@@ -9,7 +9,9 @@ import type {
 import { every, omit, xor } from 'lodash-es';
 import type { Element } from '@tailor-cms/ce-drag-drop-manifest';
 
+// Detect if hooks are running in CEK (used for mocking end-system runtime)
 const IS_CEK = process.env.CEK_RUNTIME;
+// Don't use in production, use only when IS_CEK=true
 const USER_STATE: any = {};
 
 export const afterLoaded: ElementHook<Element> = (

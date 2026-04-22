@@ -78,7 +78,7 @@ import type { Element } from '@tailor-cms/ce-drag-drop-manifest';
 
 const props = defineProps<{ element: Element; userState: any }>();
 const emit = defineEmits<{
-  interaction: [data: { response: Record<string, string[]> }];
+  'user-input': [data: { response: Record<string, string[]> }];
 }>();
 
 const initializeUserAnswer = () => {
@@ -132,9 +132,9 @@ const answersRule = (val: string[]) => {
   return !val.length || 'All the answers must be used';
 };
 
-const submit = () => emit('interaction', { response: userAnswer.value });
-
-defineExpose({ submit });
+watch(userAnswer, (val) => emit('user-input', { response: val }), {
+  deep: true,
+});
 
 watch(
   () => props.userState,

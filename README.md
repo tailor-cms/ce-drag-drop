@@ -31,8 +31,7 @@ answer groups.
 - Answers pool chip area that the learner drags from
 - One drop zone per group; chips can be returned to the pool via the close icon
 - Validates that all answers are placed before submit
-- On submit, chips are color-coded as correct (green) or incorrect (red)
-- Retry restores the initial state
+- After submission, chips are color-coded as correct (green) or incorrect (red)
 
 ## Development
 

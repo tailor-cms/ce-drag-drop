@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@tailor-cms/cek-common": "2.0.0-beta.13",
-    "uuid": "^11.1.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@tailor-cms/eslint-config": "2.0.0-beta.13",

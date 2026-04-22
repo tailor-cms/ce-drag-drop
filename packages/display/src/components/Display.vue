@@ -1,74 +1,64 @@
 <template>
-  <QuestionContainer
-    :data="element.data"
-    :is-correct="userState.isCorrect"
-    :is-submitted="isSubmitted"
-    allowed-retake
-    is-graded
-    @retry="retry"
-    @submit="submit"
-  >
-    <VRow class="mb-2" dense>
-      <VCol cols="12">
-        <VInput
-          :model-value="answers"
-          :rules="[answersRule]"
-          hide-details="auto"
-          validate-on="submit"
-        >
-          <VCard
-            class="answers d-flex flex-grow-1 flex-column w-100"
-            min-height="160"
-            variant="flat"
-            border
-          >
-            <VCardTitle class="text-subtitle-2">Answers</VCardTitle>
-            <VDivider />
-            <VCardText>
-              <Draggable v-bind="draggableOptions" :list="answers">
-                <template #item="{ element: answerId }">
-                  <VChip
-                    :class="{ draggable: !isSubmitted }"
-                    :text="element.data.answers[answerId]"
-                    label
-                  />
-                </template>
-              </Draggable>
-            </VCardText>
-          </VCard>
-        </VInput>
-      </VCol>
-      <VCol
-        v-for="{ id: groupId, group } in groupsCollection"
-        :key="groupId"
-        :cols="12 / config.groupsPerRow"
-        class="d-flex flex-column"
+  <VRow class="mb-2" dense>
+    <VCol cols="12">
+      <VInput
+        :model-value="answers"
+        :rules="[answersRule]"
+        hide-details="auto"
+        validate-on="submit"
       >
         <VCard
-          class="d-flex flex-grow-1 flex-column"
+          class="answers d-flex flex-grow-1 flex-column w-100"
           min-height="160"
           variant="flat"
           border
         >
-          <VCardTitle class="text-subtitle-2">{{ group }}</VCardTitle>
+          <VCardTitle class="text-title-small">Answers</VCardTitle>
           <VDivider />
           <VCardText>
-            <Draggable v-bind="draggableOptions" :list="userAnswer[groupId]">
+            <Draggable v-bind="draggableOptions" :list="answers">
               <template #item="{ element: answerId }">
                 <VChip
-                  v-bind="chipProps(groupId, answerId)"
                   :class="{ draggable: !isSubmitted }"
                   :text="element.data.answers[answerId]"
                   label
-                  @click:close="removeAnswer(groupId, answerId)"
                 />
               </template>
             </Draggable>
           </VCardText>
         </VCard>
-      </VCol>
-    </VRow>
-  </QuestionContainer>
+      </VInput>
+    </VCol>
+    <VCol
+      v-for="{ id: groupId, group } in groupsCollection"
+      :key="groupId"
+      :cols="12 / config.groupsPerRow"
+      class="d-flex flex-column"
+    >
+      <VCard
+        class="d-flex flex-grow-1 flex-column"
+        min-height="160"
+        variant="flat"
+        border
+      >
+        <VCardTitle class="text-title-small">{{ group }}</VCardTitle>
+        <VDivider />
+        <VCardText>
+          <Draggable v-bind="draggableOptions" :list="userAnswer[groupId]">
+            <template #item="{ element: answerId }">
+              <VChip
+                v-bind="chipProps(groupId, answerId)"
+                :class="{ draggable: !isSubmitted }"
+                :text="element.data.answers[answerId]"
+                label
+                @click:close="removeAnswer(groupId, answerId)"
+              />
+            </template>
+          </Draggable>
+        </VCardText>
+      </VCard>
+    </VCol>
+  </VRow>
 </template>
 
 <script setup lang="ts">
@@ -84,8 +74,12 @@ import {
 } from 'lodash-es';
 import { computed, ref, watch } from 'vue';
 import Draggable from 'vuedraggable/src/vuedraggable';
-import { Element } from '@tailor-cms/ce-drag-drop-manifest';
-import { QuestionContainer } from '@tailor-cms/lx-components';
+import type { Element } from '@tailor-cms/ce-drag-drop-manifest';
+
+const props = defineProps<{ element: Element; userState: any }>();
+const emit = defineEmits<{
+  interaction: [data: { response: Record<string, string[]> }];
+}>();
 
 const initializeUserAnswer = () => {
   const response = cloneDeep(props.userState?.response) ?? {};
@@ -97,15 +91,12 @@ const initializeUserAnswer = () => {
 
 const initializeAnswers = () => {
   const answerIds = Object.keys(props.element.data.answers);
-  const usedAnswerIds = flatMap(props.userState.response) as string[];
+  const usedAnswerIds = flatMap(props.userState?.response ?? {}) as string[];
   const remainingAnswers = difference(answerIds, usedAnswerIds);
   return shuffle(remainingAnswers);
 };
 
-const props = defineProps<{ element: Element; userState: any }>();
-const emit = defineEmits(['interaction']);
-
-const isSubmitted = ref(!!props.userState.isSubmitted);
+const isSubmitted = ref(!!props.userState?.isSubmitted);
 const answers = ref(initializeAnswers());
 const userAnswer = ref(initializeUserAnswer());
 
@@ -142,9 +133,8 @@ const answersRule = (val: string[]) => {
 };
 
 const submit = () => emit('interaction', { response: userAnswer.value });
-const retry = () => {
-  isSubmitted.value = false;
-};
+
+defineExpose({ submit });
 
 watch(
   () => props.userState,

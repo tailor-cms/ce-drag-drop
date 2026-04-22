@@ -6,7 +6,7 @@ export interface ElementData extends common.ElementConfig {
   question: string[];
   groups: Record<string, string>;
   answers: Record<string, string>;
-  correct: Record<string, string[]>;
+  correct?: Record<string, string[]>;
   hint: string;
 }
 

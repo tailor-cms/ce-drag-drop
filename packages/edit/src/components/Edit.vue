@@ -1,10 +1,6 @@
 <template>
-  <QuestionContainer
-    v-bind="{ elementData, embedElementConfig, isReadonly }"
-    :show-feedback="false"
-    @update="emit('update', $event)"
-  >
-    <div class="text-left text-subtitle-2 mb-2">Answer groups</div>
+  <div class="tce-drag-drop">
+    <div class="text-title-small text-left mb-2">Answer groups</div>
     <div class="d-flex flex-column ga-6">
       <VSlideYTransition group>
         <div
@@ -31,14 +27,13 @@
             </template>
             <template v-if="showDeleteGroup" #append>
               <VBtn
+                aria-label="Remove group"
                 color="secondary-lighten-1"
+                icon="mdi-delete-outline"
                 size="x-small"
                 variant="tonal"
-                icon
                 @click="removeGroup(groupKey)"
-              >
-                <VIcon icon="mdi-delete-outline" size="large" />
-              </VBtn>
+              />
             </template>
           </VTextField>
           <div :class="{ 'mr-12': showDeleteGroup }" class="ml-12">
@@ -61,13 +56,11 @@
                   <VBtn
                     aria-label="Remove answer"
                     color="primary-darken-4"
+                    icon="mdi-close"
                     size="x-small"
                     variant="text"
-                    icon
                     @click="removeAnswer(groupKey, answerKey)"
-                  >
-                    <VIcon icon="mdi-close" size="large" />
-                  </VBtn>
+                  />
                 </template>
               </VTextField>
             </VSlideYTransition>
@@ -75,11 +68,10 @@
               <VBtn
                 color="primary-darken-4"
                 prepend-icon="mdi-plus"
+                text="Add Answer"
                 variant="text"
                 @click="addAnswer(groupKey)"
-              >
-                Add Answer
-              </VBtn>
+              />
             </div>
           </div>
         </div>
@@ -89,21 +81,19 @@
       <VBtn
         color="primary-darken-4"
         prepend-icon="mdi-folder-plus"
+        text="Add Answer Group"
         variant="text"
         rounded
         @click="addGroup"
-      >
-        Add Answer Group
-      </VBtn>
+      />
     </div>
-  </QuestionContainer>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { cloneDeep, pick, pull, size } from 'lodash-es';
 import { computed, inject } from 'vue';
-import { Element } from '@tailor-cms/ce-drag-drop-manifest';
-import { QuestionContainer } from '@tailor-cms/core-components';
+import type { Element, ElementData } from '@tailor-cms/ce-drag-drop-manifest';
 import { v4 as uuid } from 'uuid';
 
 const props = defineProps<{
@@ -113,7 +103,10 @@ const props = defineProps<{
   isFocused: boolean;
   isReadonly: boolean;
 }>();
-const emit = defineEmits(['save', 'update']);
+
+const emit = defineEmits<{
+  update: [data: Partial<ElementData>];
+}>();
 
 const eventBus = inject('$eventBus') as any;
 
@@ -124,25 +117,25 @@ const showDeleteGroup = computed(
 );
 
 const getAnswers = (groupKey: string) => {
-  const keys = elementData.value.correct[groupKey];
+  const keys = elementData.value.correct?.[groupKey] ?? [];
   return pick(elementData.value.answers, keys);
 };
 
 const answerCount = (groupKey: string) =>
-  size(elementData.value.correct[groupKey]);
+  size(elementData.value.correct?.[groupKey] ?? []);
 
 const addAnswer = (groupKey: string) => {
-  const { answers, correct } = cloneDeep(elementData.value);
+  const { answers, correct = {} } = cloneDeep(elementData.value);
   const answerKey = uuid();
   answers[answerKey] = '';
-  correct[groupKey].push(answerKey);
+  correct[groupKey] = [...(correct[groupKey] ?? []), answerKey];
   emit('update', { answers, correct });
 };
 
 const removeAnswer = (groupKey: string, answerKey: string) => {
-  const { answers, correct } = cloneDeep(elementData.value);
+  const { answers, correct = {} } = cloneDeep(elementData.value);
   delete answers[answerKey];
-  pull(correct[groupKey], answerKey);
+  if (correct[groupKey]) pull(correct[groupKey], answerKey);
   emit('update', { answers, correct });
 };
 
@@ -153,7 +146,7 @@ const updateAnswer = (key: string, value: string) => {
 };
 
 const addGroup = () => {
-  const { groups, answers, correct } = cloneDeep(elementData.value);
+  const { groups, answers, correct = {} } = cloneDeep(elementData.value);
   const groupKey = uuid();
   const answerKey = uuid();
   groups[groupKey] = '';
@@ -173,8 +166,8 @@ const removeGroup = (groupKey: string) => {
     title: 'Delete answer group',
     message: 'Are you sure you want to delete this answer group?',
     action: () => {
-      const { groups, answers, correct } = cloneDeep(elementData.value);
-      correct[groupKey].forEach((key: string) => delete answers[key]);
+      const { groups, answers, correct = {} } = cloneDeep(elementData.value);
+      (correct[groupKey] ?? []).forEach((key: string) => delete answers[key]);
       delete groups[groupKey];
       delete correct[groupKey];
       emit('update', { groups, answers, correct });

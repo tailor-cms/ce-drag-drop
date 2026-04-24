@@ -44,8 +44,8 @@ export const initState: DataInitializer = (config): ElementData => {
 export const version = '1.0';
 
 export const isEmpty = (data: ElementData): boolean =>
-  !data.question?.length &&
-  !Object.values(data.groups ?? {}).some((v) => !!v?.trim()) &&
+  !data.question?.length ||
+  !Object.values(data.groups ?? {}).some((v) => !!v?.trim()) ||
   !Object.values(data.answers ?? {}).some((v) => !!v?.trim());
 
 export const mocks: ElementMocks = {

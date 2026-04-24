@@ -36,7 +36,7 @@
       class="d-flex flex-column"
     >
       <VCard
-        class="d-flex flex-grow-1 flex-column"
+        class="group d-flex flex-grow-1 flex-column"
         min-height="160"
         variant="flat"
         border

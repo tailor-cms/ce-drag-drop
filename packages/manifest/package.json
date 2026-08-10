@@ -2,6 +2,13 @@
   "name": "@tailor-cms/ce-drag-drop-manifest",
   "description": "Tailor CMS drag & drop manifest",
   "author": "Studion <info@gostudion.com> (https://github.com/tailor-cms)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tailor-cms/ce-drag-drop.git",
+    "directory": "packages/manifest"
+  },
+  "homepage": "https://github.com/tailor-cms/ce-drag-drop#readme",
+  "bugs": "https://github.com/tailor-cms/ce-drag-drop/issues",
   "type": "module",
   "version": "2.0.2",
   "exports": {

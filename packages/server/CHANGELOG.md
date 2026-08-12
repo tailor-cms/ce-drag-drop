@@ -1,5 +1,16 @@
 # @tailor-cms/ce-drag-drop-server
 
+## 2.1.0
+
+### Minor Changes
+
+- Migrate to the latest CEK version which introduced general feedback.
+
+### Patch Changes
+
+- Updated dependencies
+  - @tailor-cms/ce-drag-drop-manifest@2.1.0
+
 ## 2.0.1
 
 ### Patch Changes

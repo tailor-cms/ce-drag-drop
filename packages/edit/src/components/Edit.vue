@@ -19,7 +19,7 @@
             <template #prepend>
               <VAvatar
                 class="font-weight-bold"
-                color="primary-darken-3"
+                color="surface-container-highest"
                 size="small"
               >
                 {{ index + 1 }}
@@ -28,7 +28,7 @@
             <template v-if="showDeleteGroup" #append>
               <VBtn
                 aria-label="Remove group"
-                color="secondary-lighten-1"
+                color="error"
                 icon="mdi-delete-outline"
                 size="x-small"
                 variant="tonal"
@@ -55,9 +55,9 @@
                 >
                   <VBtn
                     aria-label="Remove answer"
-                    color="primary-darken-4"
+                    density="comfortable"
                     icon="mdi-close"
-                    size="x-small"
+                    size="small"
                     variant="text"
                     @click="removeAnswer(groupKey, answerKey)"
                   />
@@ -66,7 +66,6 @@
             </VSlideYTransition>
             <div v-if="!isReadonly" class="d-flex justify-end">
               <VBtn
-                color="primary-darken-4"
                 prepend-icon="mdi-plus"
                 text="Add Answer"
                 variant="text"
@@ -79,7 +78,6 @@
     </div>
     <div v-if="!isReadonly" class="d-flex justify-center mb-4">
       <VBtn
-        color="primary-darken-4"
         prepend-icon="mdi-folder-plus"
         text="Add Answer Group"
         variant="text"

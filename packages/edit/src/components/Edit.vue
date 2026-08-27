@@ -1,59 +1,67 @@
 <template>
-  <div class="tce-drag-drop">
-    <div class="text-title-small text-left mb-2">Answer groups</div>
-    <div class="d-flex flex-column ga-6">
+  <div class="tce-drag-drop mb-6">
+    <div class="text-label-large mb-3">Answer groups</div>
+    <div class="d-flex flex-column ga-4">
       <VSlideYTransition group>
-        <div
-          v-for="(groupName, groupKey, index) in elementData.groups"
+        <VSheet
+          v-for="(groupName, groupKey) in elementData.groups"
           :key="groupKey"
+          class="group-card pa-2"
+          border
+          rounded
         >
-          <VTextField
-            :model-value="groupName"
-            :readonly="isReadonly"
-            :rules="[(val: string) => !!val || 'Group name is required']"
-            class="mt-2"
-            label="Group name"
-            variant="outlined"
-            @update:model-value="updateGroupName(groupKey, $event)"
-          >
-            <template #prepend>
-              <VAvatar
-                class="font-weight-bold"
-                color="surface-container-highest"
-                size="small"
-              >
-                {{ index + 1 }}
-              </VAvatar>
-            </template>
-            <template v-if="showDeleteGroup" #append>
-              <VBtn
-                aria-label="Remove group"
-                color="error"
-                icon="mdi-delete-outline"
-                size="x-small"
-                variant="tonal"
-                @click="removeGroup(groupKey)"
-              />
-            </template>
-          </VTextField>
-          <div :class="{ 'mr-12': showDeleteGroup }" class="ml-12">
+          <div class="pa-2">
+            <VTextField
+              :model-value="groupName"
+              :readonly="isReadonly"
+              :rules="[(val: string) => !!val || 'Group name is required']"
+              density="comfortable"
+              label="Group name"
+              variant="outlined"
+              hide-details
+              @update:model-value="updateGroupName(groupKey, $event)"
+            >
+              <template v-if="!isReadonly" #append>
+                <VBtn
+                  :disabled="groupCount <= 2"
+                  aria-label="Remove group"
+                  color="error"
+                  density="comfortable"
+                  icon="mdi-trash-can-outline"
+                  size="small"
+                  variant="text"
+                  @click="removeGroup(groupKey)"
+                />
+              </template>
+            </VTextField>
+          </div>
+          <div class="px-2 pb-1">
             <VSlideYTransition group>
               <VTextField
-                v-for="(answer, answerKey) in getAnswers(groupKey)"
+                v-for="(answer, answerKey, index) in getAnswers(groupKey)"
                 :key="answerKey"
                 :model-value="answer"
                 :readonly="isReadonly"
                 :rules="[(val: string) => !!val || 'Answer is required']"
-                class="mt-2"
+                class="my-2"
+                density="comfortable"
                 placeholder="Answer..."
                 variant="outlined"
+                hide-details
                 @update:model-value="updateAnswer(answerKey, $event)"
               >
-                <template
-                  v-if="!isReadonly && answerCount(groupKey) > 1"
-                  #append
-                >
+                <template #prepend>
+                  <VAvatar
+                    :text="String(index + 1)"
+                    class="text-label-medium font-weight-semibold"
+                    color="surface-container-highest"
+                    rounded="lg"
+                    size="small"
+                  />
+                </template>
+                <template v-if="!isReadonly" #append>
                   <VBtn
+                    :disabled="answerCount(groupKey) <= 1"
                     aria-label="Remove answer"
                     density="comfortable"
                     icon="mdi-close"
@@ -64,7 +72,7 @@
                 </template>
               </VTextField>
             </VSlideYTransition>
-            <div v-if="!isReadonly" class="d-flex justify-end">
+            <div v-if="!isReadonly" class="d-flex justify-center mt-2">
               <VBtn
                 prepend-icon="mdi-plus"
                 text="Add Answer"
@@ -73,10 +81,15 @@
               />
             </div>
           </div>
-        </div>
+        </VSheet>
       </VSlideYTransition>
     </div>
-    <div v-if="!isReadonly" class="d-flex justify-center mb-4">
+    <VInput
+      :rules="groupsValidation"
+      :validation-value="[elementData.groups, elementData.answers]"
+      hide-details="auto"
+    />
+    <div v-if="!isReadonly" class="d-flex justify-center mt-3">
       <VBtn
         prepend-icon="mdi-folder-plus"
         text="Add Answer Group"
@@ -110,9 +123,14 @@ const eventBus = inject('$eventBus') as any;
 
 const elementData = computed(() => props.element.data);
 const groupCount = computed(() => size(elementData.value.groups));
-const showDeleteGroup = computed(
-  () => !props.isReadonly && groupCount.value > 2,
-);
+
+const groupsValidation = [
+  () => {
+    const { groups, answers } = elementData.value;
+    const values = [...Object.values(groups), ...Object.values(answers)];
+    return values.every(Boolean) || 'All group names and answers are required';
+  },
+];
 
 const getAnswers = (groupKey: string) => {
   const keys = elementData.value.correct?.[groupKey] ?? [];

@@ -1,41 +1,48 @@
 <template>
   <div class="tce-drag-drop mb-6">
-    <div class="text-label-large mb-3">Answer groups</div>
-    <div class="d-flex flex-column ga-4">
-      <VSlideYTransition group>
-        <VSheet
+    <VExpansionPanels :model-value="expanded" flat multiple rounded>
+      <VExpandTransition group>
+        <VExpansionPanel
           v-for="(groupName, groupKey) in elementData.groups"
           :key="groupKey"
-          class="group-card pa-2"
-          border
-          rounded
+          :value="groupKey"
+          class="group-card"
         >
-          <div class="pa-2">
-            <VTextField
-              :model-value="groupName"
-              :readonly="isReadonly"
-              :rules="[(val: string) => !!val || 'Group name is required']"
-              density="comfortable"
-              label="Group name"
-              variant="outlined"
-              hide-details
-              @update:model-value="updateGroupName(groupKey, $event)"
-            >
-              <template v-if="!isReadonly" #append>
-                <VBtn
-                  :disabled="groupCount <= 2"
-                  aria-label="Remove group"
-                  color="error"
-                  density="comfortable"
-                  icon="mdi-trash-can-outline"
-                  size="small"
-                  variant="text"
-                  @click="removeGroup(groupKey)"
-                />
-              </template>
-            </VTextField>
-          </div>
-          <div class="px-2 pb-1">
+          <VExpansionPanelTitle
+            class="py-0 pl-0 pr-4"
+            min-height="50"
+            readonly
+            @click="onTitleClick($event, groupKey)"
+          >
+            <div class="d-flex align-center w-100 ga-2">
+              <VTextField
+                :model-value="groupName"
+                :readonly="isReadonly"
+                :rules="[(val: string) => !!val || 'Group name is required']"
+                bg-color="transparent"
+                class="group-name px-1"
+                density="compact"
+                label="Answer group"
+                placeholder="Group name..."
+                variant="solo"
+                flat
+                hide-details
+                @update:model-value="updateGroupName(groupKey, $event)"
+              />
+              <VBtn
+                v-if="!isReadonly && groupCount > 2"
+                aria-label="Remove group"
+                class="mr-2"
+                color="error"
+                density="comfortable"
+                icon="mdi-trash-can-outline"
+                size="small"
+                variant="text"
+                @click.stop="removeGroup(groupKey)"
+              />
+            </div>
+          </VExpansionPanelTitle>
+          <VExpansionPanelText class="border-t-thin">
             <VSlideYTransition group>
               <VTextField
                 v-for="(answer, answerKey, index) in getAnswers(groupKey)"
@@ -80,10 +87,10 @@
                 @click="addAnswer(groupKey)"
               />
             </div>
-          </div>
-        </VSheet>
-      </VSlideYTransition>
-    </div>
+          </VExpansionPanelText>
+        </VExpansionPanel>
+      </VExpandTransition>
+    </VExpansionPanels>
     <VInput
       :rules="groupsValidation"
       :validation-value="[elementData.groups, elementData.answers]"
@@ -102,8 +109,8 @@
 </template>
 
 <script lang="ts" setup>
-import { cloneDeep, pick, pull, size } from 'lodash-es';
-import { computed, inject } from 'vue';
+import { cloneDeep, pick, pull, size, without } from 'lodash-es';
+import { computed, inject, ref } from 'vue';
 import type { Element, ElementData } from '@tailor-cms/ce-drag-drop-manifest';
 import { v4 as uuid } from 'uuid';
 
@@ -123,6 +130,17 @@ const eventBus = inject('$eventBus') as any;
 
 const elementData = computed(() => props.element.data);
 const groupCount = computed(() => size(elementData.value.groups));
+
+const collapsed = ref<string[]>([]);
+const expanded = computed(() =>
+  without(Object.keys(elementData.value.groups), ...collapsed.value),
+);
+
+const onTitleClick = ({ target }: MouseEvent, groupKey: string) => {
+  if ((target as HTMLElement).closest('.v-input, .v-btn')) return;
+  if (collapsed.value.includes(groupKey)) pull(collapsed.value, groupKey);
+  else collapsed.value.push(groupKey);
+};
 
 const groupsValidation = [
   () => {
@@ -195,5 +213,13 @@ const removeGroup = (groupKey: string) => {
 <style lang="scss" scoped>
 .tce-drag-drop {
   text-align: left;
+}
+
+.group-card {
+  border: thin solid rgba(0, 0, 0, 0.12);
+}
+
+:deep(.v-btn) {
+  --v-hover-opacity: 0.12;
 }
 </style>

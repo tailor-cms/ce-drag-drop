@@ -23,6 +23,7 @@ export class Edit extends pom.EditPanel {
     this.addAnswerBtns = this.root.getByRole('button', { name: 'Add Answer' });
     this.removeGroupBtns = this.root.getByRole('button', {
       name: 'Remove group',
+      exact: true,
     });
     this.confirmationDialog = this.el
       .locator('.v-dialog')

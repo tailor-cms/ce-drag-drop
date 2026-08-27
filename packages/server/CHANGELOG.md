@@ -1,5 +1,13 @@
 # @tailor-cms/ce-drag-drop-server
 
+## 2.1.1
+
+### Patch Changes
+
+- Migrate to latest tce-boot version and refactor question edit component.
+- Updated dependencies
+  - @tailor-cms/ce-drag-drop-manifest@2.1.1
+
 ## 2.1.0
 
 ### Minor Changes

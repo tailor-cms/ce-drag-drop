@@ -15,7 +15,7 @@ export class Edit extends pom.EditPanel {
     super(page);
     this.form = new pom.EditQuestionForm(this.el);
     this.root = this.form.el.locator('.tce-drag-drop');
-    this.groupNameInputs = this.root.getByLabel('Group name');
+    this.groupNameInputs = this.root.getByLabel('Answer group');
     this.answerInputs = this.root.getByPlaceholder('Answer...');
     this.addGroupBtn = this.root.getByRole('button', {
       name: 'Add Answer Group',
@@ -23,6 +23,7 @@ export class Edit extends pom.EditPanel {
     this.addAnswerBtns = this.root.getByRole('button', { name: 'Add Answer' });
     this.removeGroupBtns = this.root.getByRole('button', {
       name: 'Remove group',
+      exact: true,
     });
     this.confirmationDialog = this.el
       .locator('.v-dialog')

@@ -1,5 +1,13 @@
 # @tailor-cms/ce-drag-drop-server
 
+## 2.1.2
+
+### Patch Changes
+
+- Fix border radius.
+- Updated dependencies
+  - @tailor-cms/ce-drag-drop-manifest@2.1.2
+
 ## 2.1.1
 
 ### Patch Changes

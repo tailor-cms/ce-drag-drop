@@ -1,5 +1,11 @@
 # @tailor-cms/ce-drag-drop-display
 
+## 2.1.2
+
+### Patch Changes
+
+- Fix border radius.
+
 ## 2.1.1
 
 ### Patch Changes

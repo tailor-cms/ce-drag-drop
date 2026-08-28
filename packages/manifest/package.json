@@ -11,7 +11,7 @@
   "homepage": "https://github.com/tailor-cms/ce-drag-drop#readme",
   "bugs": "https://github.com/tailor-cms/ce-drag-drop/issues",
   "type": "module",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",

@@ -1,6 +1,6 @@
 <template>
   <div class="tce-drag-drop mb-6">
-    <VExpansionPanels :model-value="expanded" flat multiple rounded>
+    <VExpansionPanels :model-value="expanded" rounded="lg" flat multiple>
       <VExpandTransition group>
         <VExpansionPanel
           v-for="(groupName, groupKey) in elementData.groups"

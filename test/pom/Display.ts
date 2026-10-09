@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { pom } from '@tailor-cms/cek-e2e';
 
 export class Display extends pom.DisplayPanel {
@@ -28,6 +28,12 @@ export class Display extends pom.DisplayPanel {
   async dragChipToGroup(chipText: string, groupText: string) {
     const chip = this.chipByText(chipText);
     const group = this.groupCardByText(groupText);
+    // SortableJS ignores a pointerdown on an item that is still running its
+    // sort animation (`el.animated`), e.g. pool chips reflowing after the
+    // previous drag, so wait for it to settle before grabbing the chip.
+    await expect
+      .poll(() => chip.evaluate((el: any) => !el.animated))
+      .toBe(true);
     await chip.hover();
     await this.page.mouse.down();
     const box = await group.boundingBox();
@@ -36,5 +42,7 @@ export class Display extends pom.DisplayPanel {
       steps: 10,
     });
     await this.page.mouse.up();
+    // Ensure the drop registered before the next interaction
+    await expect(group.locator('.v-chip', { hasText: chipText })).toBeVisible();
   }
 }
